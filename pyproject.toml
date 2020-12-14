@@ -11,8 +11,6 @@ python = "^3.8"
 devtools = "*"
 pycairo = "*"
 PyGObject = "*"
-sultan = "^0.9.1"
-seashore = "^20.6.0"
 plumbum = "^1.6.9"
 
 [tool.poetry.dev-dependencies]
