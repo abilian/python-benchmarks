@@ -8,7 +8,12 @@ import shutil
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
+from typing import List, Dict, Any
+
+from devtools import debug
+from plumbum import local
+
+PATH = os.environ["PATH"]
 
 
 @dataclass
@@ -18,10 +23,11 @@ class Runner:
 
     start_time: float = 0
     end_time: float = 0
-    variants: List[str] = field(default_factory=list)
-    variant: str = ""
+    variants: List[Dict[str, Any]] = field(default_factory=list)
+    interpreter: str = ""
     status: int = 0
-    # extension: str = field(default="")
+    path: str = ""
+    extension: str = ""
 
     @property
     def source_name(self):
@@ -40,7 +46,7 @@ class Runner:
 
     @property
     def run_cmd(self):
-        cmd = f"{self.variant} {self.source_name}"
+        cmd = f"{self.interpreter} {self.source_name}"
         if self.args:
             cmd += " " + self.args
         cmd += " > /dev/null"
@@ -54,85 +60,97 @@ class Runner:
 
     def run(self):
         self.start_time = time.time()
-        # print(self.run_cmd)
         self._run()
         self.end_time = time.time()
 
     def _run(self):
-        self.status = self.system(self.run_cmd)
+        with local.env(PATH=self.path or PATH):
+            cmd = self.run_cmd.split(" ")
+            local["sh"]["-c", cmd]()
+            # self.status = self.system(self.run_cmd)
 
     def system(self, cmd):
         with chdir("sandbox"):
-            return os.system(self.cmd)
+            print(f"> {cmd}")
+            return os.system(cmd)
 
 
 class PyRunner(Runner):
-    name = "Python"
-    extension = "py"
-    variants = [
-        "python3.6",
-        "python3.7",
-        "python3.8",
-        "python3.9",
-        "python3.10",
-        "pypy3",
-    ]
+    def __post_init__(self):
+        self.name = "Python"
+        self.extension = "py"
+        self.variants = [
+            {
+                "interpreter": [
+                    "python3.6",
+                    "python3.7",
+                    "python3.8",
+                    "python3.8",
+                    "python3.10",
+                    "pypy3",
+                ]
+            },
+        ]
 
 
 class LuaRunner(Runner):
-    name = "Lua"
-    extension = "lua"
-    variants = [
-        "lua",
-        "luajit",
-    ]
+    def __post_init__(self):
+        self.name = "Lua"
+        self.extension = "lua"
+        self.variants = [
+            {"interpreter": ["lua", "luajit"]},
+        ]
+        debug(vars(self))
 
 
 class JSRunner(Runner):
-    name = "JavaScript"
-    extension = "js"
-    variants = [
-        "node",
-    ]
+    def __post_init__(self):
+        self.name: str = "JavaScript"
+        self.extension: str = "js"
+        self.interpreter: str = "node"
+        debug(vars(self))
 
 
 class RubyRunner(Runner):
-    name = "Ruby"
-    extension = "rb"
-    variants = [
-        "ruby",
-    ]
+    def __post_init__(self):
+        self.name = "Ruby"
+        self.extension = "rb"
+        self.interpreter = "ruby"
+        debug(vars(self))
 
 
 class PhpRunner(Runner):
-    name = "PHP"
-    extension = "php"
-    variants = [
-        "php",
-    ]
+    def __post_init__(self):
+        self.name = "PHP"
+        self.extension = "php"
+        self.interpreter = "php"
+        debug(vars(self))
 
 
 class CythonRunner(Runner):
-    name = "Cython"
-    extension = "pyx"
-    variants = [
-        "envs/cython/bin/cython",
-        "envs/cython-dev/bin/cython",
-        "envs/cython-plus/bin/cython",
-    ]
+    def __post_init__(self):
+        self.name = "Cython"
+        self.extension = "pyx"
+        self.variants = [
+            {
+                "path": [
+                    f"envs/cython/bin:{PATH}",
+                    f"envs/cython-dev/bin:{PATH}",
+                    f"envs/cython-plus/bin:{PATH}",
+                ]
+            },
+        ]
+        debug(vars(self))
 
     def compile(self):
-        cmd = f"cythonize -3 -bi {self.source_name} > /dev/null"
-        os.system(cmd)
+        with local.env(PATH=self.path):
+            local.cythonize["-3", "-bi", self.source_name]()
+            # cmd = f"cythonize -3 -bi {self.source_name} > /dev/null"
+            # os.system(cmd)
 
     @property
     def run_cmd(self):
-        return f"python3.9 -c 'import {self.prog_name}' {self.args} > /dev/null"
-
-    # def _run(self):
-    #     # print(self.run_cmd)
-    #     self.status = os.system(self.run_cmd)
-    #     # sys.exit()
+        return f"python3.8 -c 'import {self.prog_name}' {self.args} > /dev/null"
 
 
 # class CRunner(Runner):
@@ -155,19 +173,34 @@ def get_runners(prog_name, source_path):
         if not is_runner_subclass(v):
             continue
 
+        debug(v)
         cls = v
         if cls.variants:
-            for variant in cls.variants:
-                runner = cls(prog_name, source_path, variant=variant)
-                runners.append(runner)
+            # TODO: multiples axes
+            d = cls.variants[0]
+
+            if "path" in d:
+                for path in d["path"]:
+                    runner = cls(prog_name, source_path, path=path)
+                    runners.append(runner)
+
+            elif "interpreter" in d:
+                for interpreter in d["interpreter"]:
+                    runner = cls(prog_name, source_path, interpreter=interpreter)
+                    runners.append(runner)
+
         else:
             runner = cls(prog_name, source_path)
             runners.append(runner)
+
+    # debug(runners)
 
     runners2 = []
     for runner in runners:
         if runner.match():
             runners2.append(runner)
+
+    debug(runners2)
 
     return runners2
 
@@ -196,7 +229,7 @@ def run_all(prog_name):
             runner.run()
             if runner.status == 0:
                 print(
-                    f"{runner.source_name} {runner.name}/{runner.variant}: {runner.duration}"
+                    f"{runner.source_name} {runner.name}/{runner.intepreter}: {runner.duration}"
                 )
 
 
