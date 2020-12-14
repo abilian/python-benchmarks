@@ -1,0 +1,13 @@
+.idea
+.tox
+.DS_Store
+.coverage
+.cache
+.mypy_cache
+.venv
+
+__pycache__
+
+dist
+envs
+

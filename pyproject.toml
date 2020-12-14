@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "python-benchmarks"
+version = "0.1.0"
+description = ""
+authors = ["Stefane Fermigier <sf@fermigier.com>"]
+license = "Apache"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+devtools = "*"
+pycairo = "*"
+PyGObject = "*"
+sultan = "^0.9.1"
+seashore = "^20.6.0"
+plumbum = "^1.6.9"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
