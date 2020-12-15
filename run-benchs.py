@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import annotations
+
 import contextlib
 import os
 import glob
@@ -16,141 +18,193 @@ from plumbum import local
 PATH = os.environ["PATH"]
 
 
-@dataclass
 class Runner:
-    prog_name: str
-    source_path: str
+    name: str
+    extension: str
+    interpreter: str
+    variants: List[Dict[str, Any]] = []
 
-    start_time: float = 0
-    end_time: float = 0
-    variants: List[Dict[str, Any]] = field(default_factory=list)
-    interpreter: str = ""
-    status: int = 0
-    path: str = ""
-    extension: str = ""
+    def match(self, source_name):
+        return source_name.endswith(f".{self.extension}")
 
-    @property
-    def source_name(self):
-        return pathlib.Path(self.source_path).name
+    def prepare_sandbox(self, filename):
+        shutil.rmtree("sandbox")
+        os.mkdir("sandbox")
+        shutil.copy(filename, "sandbox")
 
-    @property
-    def duration(self):
-        return self.end_time - self.start_time
+    def run_all(self, source_path):
+        if self.variants:
+            # TODO: multiples axes
+            d = self.variants[0]
 
-    @property
-    def args(self):
-        if Path("args.txt").exists():
-            return open("args.txt").read()
+            if "path" in d:
+                for path in d["path"]:
+                    run = Run(self, source_path, path=path)
+                    self.run(run)
+
+            elif "interpreter" in d:
+                for interpreter in d["interpreter"]:
+                    run = Run(self, source_path, interpreter=interpreter)
+                    self.run(run)
+
         else:
-            return ""
+            run = Run(self, source_path)
+            self.run(run)
 
-    @property
-    def run_cmd(self):
-        cmd = f"{self.interpreter} {self.source_name}"
-        if self.args:
-            cmd += " " + self.args
+    def compile(self, source_name: str) -> None:
+        pass
+
+    def run(self, run: Run) -> None:
+        run.start()
+        self._run(run)
+        run.stop()
+        run.report()
+
+    def _run(self, run: Run) -> None:
+        with chdir("sandbox"):
+            with local.env(PATH=run.path or PATH):
+                cmd = self.run_cmd(run).split(" ")
+                print(f"> {cmd}")
+                local["sh"]["-c", cmd]()
+                # self.status = self.system(self.run_cmd)
+
+    def run_cmd(self, run: Run) -> str:
+        """
+        Default run command. Can be overridden in subclass.
+        """
+        cmd = f"{run.interpreter} {run.source_name}"
+        if run.args:
+            cmd += " " + run.args
         cmd += " > /dev/null"
         return cmd
 
-    def match(self):
-        return self.source_name.endswith(f".{self.extension}")
+    # def system(self, cmd: str) -> int:
+    #     with chdir("sandbox"):
+    #         print(f"> {cmd}")
+    #         return os.system(cmd)
 
-    def compile(self):
-        pass
 
-    def run(self):
+@dataclass
+class Run:
+    runner: Runner
+    source_path: str
+    interpreter: str = ""
+    start_time: float = 0
+    end_time: float = 0
+    status: int = 0
+    path: str = ""
+
+    @property
+    def prog_name(self) -> str:
+        return pathlib.Path(self.source_path).parent.name
+
+    @property
+    def source_name(self) -> str:
+        return pathlib.Path(self.source_path).name
+
+    @property
+    def args(self) -> str:
+        source_dir = pathlib.Path(self.source_path).parent
+        args_txt = source_dir / "args.txt"
+        if args_txt.exists():
+            return args_txt.open().read()
+        else:
+            return ""
+
+    def start(self):
         self.start_time = time.time()
-        self._run()
+
+    def stop(self):
         self.end_time = time.time()
 
-    def _run(self):
-        with local.env(PATH=self.path or PATH):
-            cmd = self.run_cmd.split(" ")
-            local["sh"]["-c", cmd]()
-            # self.status = self.system(self.run_cmd)
+    @property
+    def duration(self) -> float:
+        return self.end_time - self.start_time
 
-    def system(self, cmd):
-        with chdir("sandbox"):
-            print(f"> {cmd}")
-            return os.system(cmd)
+    def report(self):
+        if self.status == 0:
+            print(
+                f"{self.source_name} {self.runner.name}/{self.interpreter}: {self.duration}"
+            )
 
 
 class PyRunner(Runner):
-    def __post_init__(self):
-        self.name = "Python"
-        self.extension = "py"
-        self.variants = [
-            {
-                "interpreter": [
-                    "python3.6",
-                    "python3.7",
-                    "python3.8",
-                    "python3.8",
-                    "python3.10",
-                    "pypy3",
-                ]
-            },
-        ]
+    name = "Python"
+    extension = "py"
+    variants = [
+        {
+            "interpreter": [
+                "python3.6",
+                "python3.7",
+                "python3.8",
+                "python3.8",
+                "python3.10",
+                "pypy3",
+            ]
+        },
+    ]
 
 
 class LuaRunner(Runner):
-    def __post_init__(self):
-        self.name = "Lua"
-        self.extension = "lua"
-        self.variants = [
-            {"interpreter": ["lua", "luajit"]},
-        ]
-        debug(vars(self))
+    name = "Lua"
+    extension = "lua"
+    variants = [
+        {"interpreter": ["lua", "luajit"]},
+    ]
 
 
 class JSRunner(Runner):
-    def __post_init__(self):
-        self.name: str = "JavaScript"
-        self.extension: str = "js"
-        self.interpreter: str = "node"
-        debug(vars(self))
+    name = "JavaScript"
+    extension = "js"
+    interpreter = "node"
 
 
 class RubyRunner(Runner):
-    def __post_init__(self):
-        self.name = "Ruby"
-        self.extension = "rb"
-        self.interpreter = "ruby"
-        debug(vars(self))
+    name = "Ruby"
+    extension = "rb"
+    interpreter = "ruby"
 
 
 class PhpRunner(Runner):
-    def __post_init__(self):
-        self.name = "PHP"
-        self.extension = "php"
-        self.interpreter = "php"
-        debug(vars(self))
+    name = "PHP"
+    extension = "php"
+    interpreter = "php"
 
 
 class CythonRunner(Runner):
-    def __post_init__(self):
-        self.name = "Cython"
-        self.extension = "pyx"
-        self.variants = [
-            {
-                "path": [
-                    f"envs/cython/bin:{PATH}",
-                    f"envs/cython-dev/bin:{PATH}",
-                    f"envs/cython-plus/bin:{PATH}",
-                ]
-            },
-        ]
-        debug(vars(self))
+    name = "Cython"
+    extension = "pyx"
+    variants = [
+        {
+            "path": [
+                f"envs/cython/bin:{PATH}",
+                f"envs/cython-dev/bin:{PATH}",
+                f"envs/cython-plus/bin:{PATH}",
+            ]
+        },
+    ]
 
-    def compile(self):
-        with local.env(PATH=self.path):
-            local.cythonize["-3", "-bi", self.source_name]()
+    # def __post_init__(self):
+    #     self.name = "Cython"
+    #     self.extension = "pyx"
+    #     self.variants = [
+    #         {
+    #             "path": [
+    #                 f"envs/cython/bin:{PATH}",
+    #                 f"envs/cython-dev/bin:{PATH}",
+    #                 f"envs/cython-plus/bin:{PATH}",
+    #             ]
+    #         },
+    #     ]
+
+    def compile(self, run: Run):
+        with local.env(PATH=run.path):
+            local.cythonize["-3", "-bi", run.source_name]()
             # cmd = f"cythonize -3 -bi {self.source_name} > /dev/null"
             # os.system(cmd)
 
-    @property
-    def run_cmd(self):
-        return f"python3.8 -c 'import {self.prog_name}' {self.args} > /dev/null"
+    def run_cmd(self, run: Run) -> str:
+        return f"python3.8 -c 'import {run.prog_name}' {run.args} > /dev/null"
 
 
 # class CRunner(Runner):
@@ -166,71 +220,78 @@ class CythonRunner(Runner):
 #         return f"./a.out {self.args} > /dev/null"
 
 
-def get_runners(prog_name, source_path):
-    runners = []
-    ns = globals()
-    for v in ns.values():
-        if not is_runner_subclass(v):
-            continue
+def all_runners():
+    def is_runner_subclass(v):
+        if not type(v) == type:
+            return False
+        if v is Runner:
+            return False
+        if not issubclass(v, Runner):
+            return False
+        return True
 
-        debug(v)
-        cls = v
-        if cls.variants:
-            # TODO: multiples axes
-            d = cls.variants[0]
+    return [r() for r in globals().values() if is_runner_subclass(r)]
 
-            if "path" in d:
-                for path in d["path"]:
-                    runner = cls(prog_name, source_path, path=path)
-                    runners.append(runner)
+    # runners = []
+    # ns = globals()
+    # for v in ns.values():
+    #     if not is_runner_subclass(v):
+    #         continue
+    #
+    #     debug(v)
+    #     cls = v
+    #     if cls.variants:
+    #         # TODO: multiples axes
+    #         d = cls.variants[0]
+    #
+    #         if "path" in d:
+    #             for path in d["path"]:
+    #                 runner = cls(path=path)
+    #                 runners.append(runner)
+    #
+    #         elif "interpreter" in d:
+    #             for interpreter in d["interpreter"]:
+    #                 runner = cls(interpreter=interpreter)
+    #                 runners.append(runner)
+    #
+    #     else:
+    #         runner = cls()
+    #         runners.append(runner)
+    #
+    # return runners
 
-            elif "interpreter" in d:
-                for interpreter in d["interpreter"]:
-                    runner = cls(prog_name, source_path, interpreter=interpreter)
-                    runners.append(runner)
-
-        else:
-            runner = cls(prog_name, source_path)
-            runners.append(runner)
-
-    # debug(runners)
-
-    runners2 = []
-    for runner in runners:
-        if runner.match():
-            runners2.append(runner)
-
-    debug(runners2)
-
-    return runners2
-
-
-def is_runner_subclass(v):
-    if not type(v) == type:
-        return False
-    if v is Runner:
-        return False
-    if not issubclass(v, Runner):
-        return False
-    return True
-
-
-def prepare_sandbox(filename):
-    shutil.rmtree("sandbox")
-    os.mkdir("sandbox")
-    shutil.copy(filename, "sandbox")
+    # # debug(runners)
+    #
+    # runners2 = []
+    # for runner in runners:
+    #     if runner.match():
+    #         runners2.append(runner)
+    #
+    # debug(runners2)
+    #
+    # return runners2
 
 
 def run_all(prog_name):
+    runners = all_runners()
+
     for source_path in glob.glob(f"programs/{prog_name}/{prog_name}*"):
-        for runner in get_runners(prog_name, source_path):
-            prepare_sandbox(source_path)
-            runner.compile()
-            runner.run()
-            if runner.status == 0:
-                print(
-                    f"{runner.source_name} {runner.name}/{runner.intepreter}: {runner.duration}"
-                )
+        for runner in runners:
+            if not runner.match(source_path):
+                continue
+
+            print(f"Running runner {runner.name} on {source_path}")
+
+            runner.run_all(source_path)
+
+            # runner.prepare_sandbox(source_path)
+            # runner.compile(source_path)
+            # runner.run_all(source_path)
+            #
+            # if runner.status == 0:
+            #     print(
+            #         f"{runner.source_name} {runner.name}/{runner.intepreter}: {runner.duration}"
+            #     )
 
 
 @contextlib.contextmanager
