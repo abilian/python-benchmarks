@@ -7,11 +7,10 @@ import glob
 import os
 import pathlib
 import shutil
+import subprocess
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, Field
 from typing import List, Dict, Any, Optional
-
-from plumbum import local
 
 PATH = os.environ["PATH"]
 
@@ -20,7 +19,7 @@ class Runner:
     name: str
     extension: str
     interpreter: str
-    variants: List[Dict[str, Any]] = []
+    variants: List[Dict[str, Any]] = ()
 
     def match(self, source_name):
         return source_name.endswith(f".{self.extension}")
@@ -41,14 +40,15 @@ class Runner:
         os.mkdir("sandbox")
         shutil.copy(filename, "sandbox")
 
-    def compile(self, source_name: str) -> None:
-        pass
-
     def run(self, run: Run) -> None:
+        self.compile(run)
         cmd = self.run_cmd(run)
         run.run(cmd)
 
-    def run_cmd(self, run: Run) -> str:
+    def compile(self, source_name):
+        pass
+
+    def run_cmd(self, run: Run) -> List[str]:
         """Default run command.
 
         Can be overridden in subclass.
@@ -59,9 +59,9 @@ class Runner:
         else:
             interpreter = self.interpreter
 
-        cmd = f"{interpreter} {run.source_name}"
+        cmd = [interpreter, run.source_name]
         if run.args:
-            cmd += " " + run.args
+            cmd += run.args.split(" ")
 
         return cmd
 
@@ -73,8 +73,6 @@ class Run:
     variant: Optional[Dict] = None
     start_time: float = 0
     end_time: float = 0
-    status: int = 0
-    path: str = ""
 
     @property
     def prog_name(self) -> str:
@@ -87,28 +85,49 @@ class Run:
     @property
     def variant_name(self) -> str:
         if not self.variant:
-            return ""
-        if "env" in self.variant:
-            return self.variant["env"]
+            return self.runner.interpreter
+        if "virtualenv" in self.variant:
+            return self.variant["virtualenv"]
         if "interpreter" in self.variant:
             return self.variant["interpreter"]
+        return "???"
+
+    @property
+    def virtualenv(self) -> str:
+        if self.variant and "virtualenv" in self.variant:
+            return self.variant["virtualenv"]
+        return ""
 
     @property
     def args(self) -> str:
         source_dir = pathlib.Path(self.source_path).parent
         args_txt = source_dir / "args.txt"
         if args_txt.exists():
-            return args_txt.open().read()
+            return args_txt.open().read().strip()
         else:
             return ""
 
     def run(self, cmd):
         self.start_time = time.time()
 
-        with chdir("sandbox"):
-            with local.env(PATH=self.path or PATH):
-                # print(f"> {cmd}")
-                local["sh"]["-c", cmd]()
+        if self.virtualenv:
+            env = dict(os.environ)
+            path = f"{os.getcwd()}/envs/{self.virtualenv}/bin:{PATH}"
+            env["PATH"] = path
+            cmd[0] = f"{os.getcwd()}/envs/{self.virtualenv}/bin/{cmd[0]}"
+            p = subprocess.run(
+                cmd,
+                cwd="sandbox",
+                env=env,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            assert p.returncode == 0
+        else:
+            p = subprocess.run(
+                cmd, cwd="sandbox", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
+            assert p.returncode == 0
 
         self.end_time = time.time()
         self.report()
@@ -118,10 +137,11 @@ class Run:
         return self.end_time - self.start_time
 
     def report(self):
-        if self.status == 0:
-            print(
-                f"{self.source_name} {self.runner.name}/{self.variant}: {self.duration}"
-            )
+        print(
+            f"{self.source_name:<15} "
+            f"{(self.runner.name + '/' + self.variant_name):<20} "
+            f"{self.duration:3.3f}"
+        )
 
 
 class PyRunner(Runner):
@@ -138,7 +158,7 @@ class PyRunner(Runner):
             "interpreter": "python3.8",
         },
         {
-            "interpreter": "python3.8",
+            "interpreter": "python3.9",
         },
         {
             "interpreter": "python3.10",
@@ -181,34 +201,24 @@ class CythonRunner(Runner):
     extension = "pyx"
     variants = [
         {
-            "name": "cython",
             "virtualenv": "cython",
         },
         {
-            "name": "cython-dev",
             "virtualenv": "cython-dev",
         },
         {
-            "name": "cython-dev",
-            "virtualenv": "cython-dev",
+            "virtualenv": "cython-plus",
         },
-        #
-        #     "path": [
-        #         f"envs/cython/bin:{PATH}",
-        #         f"envs/cython-dev/bin:{PATH}",
-        #         f"envs/cython-plus/bin:{PATH}",
-        #     ]
-        # },
     ]
 
     def compile(self, run: Run):
-        with local.env(PATH=run.path):
-            local.cythonize["-3", "-bi", run.source_name]()
-            # cmd = f"cythonize -3 -bi {self.source_name} > /dev/null"
-            # os.system(cmd)
+        executable = f"{os.getcwd()}/envs/{run.virtualenv}/bin/cythonize"
+        cmd = [executable, "-3", "-bi", run.source_name]
+        p = subprocess.run(cmd, cwd="sandbox", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        assert p.returncode == 0
 
-    def run_cmd(self, run: Run) -> str:
-        return f"python3.8 -c 'import {run.prog_name}' {run.args} > /dev/null"
+    def run_cmd(self, run: Run) -> List[str]:
+        return ["python3", "-c", f"import {run.prog_name}", run.args]
 
 
 # class CRunner(Runner):
@@ -234,13 +244,14 @@ def all_runners():
             return False
         return True
 
-    return [r() for r in globals().values() if is_runner_subclass(r)]
+    result = [r() for r in globals().values() if is_runner_subclass(r)]
+    return sorted(result, key=lambda x: x.name)
 
 
 def run_all(prog_name):
     runners = all_runners()
 
-    for source_path in glob.glob(f"programs/{prog_name}/{prog_name}*"):
+    for source_path in sorted(glob.glob(f"programs/{prog_name}/{prog_name}*")):
         for runner in runners:
             if not runner.match(source_path):
                 continue
@@ -260,10 +271,11 @@ def chdir(dirname=None):
 
 
 def main():
-    for program_dir in glob.glob("programs/*"):
+    for program_dir in sorted(glob.glob("programs/*")):
         prog_name = program_dir.split("/")[1]
-        if prog_name != "richards":
-            continue
+
+        # if prog_name != "richards":
+        #     continue
 
         title = f"Running benchmarks for {prog_name}"
         print(title)
