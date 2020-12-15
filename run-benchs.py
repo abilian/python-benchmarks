@@ -69,8 +69,9 @@ class Runner:
                 # self.status = self.system(self.run_cmd)
 
     def run_cmd(self, run: Run) -> str:
-        """
-        Default run command. Can be overridden in subclass.
+        """Default run command.
+
+        Can be overridden in subclass.
         """
         cmd = f"{run.interpreter} {run.source_name}"
         if run.args:
