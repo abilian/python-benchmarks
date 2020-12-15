@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import contextlib
-import os
 import glob
+import os
 import pathlib
 import shutil
 import time
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import List, Dict, Any
+from dataclasses import dataclass
+from typing import List, Dict, Any, Optional
 
-from devtools import debug
 from plumbum import local
 
 PATH = os.environ["PATH"]
@@ -27,69 +25,52 @@ class Runner:
     def match(self, source_name):
         return source_name.endswith(f".{self.extension}")
 
-    def prepare_sandbox(self, filename):
-        shutil.rmtree("sandbox")
-        os.mkdir("sandbox")
-        shutil.copy(filename, "sandbox")
-
     def run_all(self, source_path):
+        self.prepare_sandbox(source_path)
         if self.variants:
-            # TODO: multiples axes
-            d = self.variants[0]
-
-            if "path" in d:
-                for path in d["path"]:
-                    run = Run(self, source_path, path=path)
-                    self.run(run)
-
-            elif "interpreter" in d:
-                for interpreter in d["interpreter"]:
-                    run = Run(self, source_path, interpreter=interpreter)
-                    self.run(run)
+            for variant in self.variants:
+                run = Run(self, source_path, variant=variant)
+                self.run(run)
 
         else:
             run = Run(self, source_path)
             self.run(run)
 
+    def prepare_sandbox(self, filename):
+        shutil.rmtree("sandbox")
+        os.mkdir("sandbox")
+        shutil.copy(filename, "sandbox")
+
     def compile(self, source_name: str) -> None:
         pass
 
     def run(self, run: Run) -> None:
-        run.start()
-        self._run(run)
-        run.stop()
-        run.report()
-
-    def _run(self, run: Run) -> None:
-        with chdir("sandbox"):
-            with local.env(PATH=run.path or PATH):
-                cmd = self.run_cmd(run).split(" ")
-                print(f"> {cmd}")
-                local["sh"]["-c", cmd]()
-                # self.status = self.system(self.run_cmd)
+        cmd = self.run_cmd(run)
+        run.run(cmd)
 
     def run_cmd(self, run: Run) -> str:
         """Default run command.
 
         Can be overridden in subclass.
         """
-        cmd = f"{run.interpreter} {run.source_name}"
+        variant = run.variant
+        if variant and "interpreter" in variant:
+            interpreter = variant["interpreter"]
+        else:
+            interpreter = self.interpreter
+
+        cmd = f"{interpreter} {run.source_name}"
         if run.args:
             cmd += " " + run.args
-        cmd += " > /dev/null"
-        return cmd
 
-    # def system(self, cmd: str) -> int:
-    #     with chdir("sandbox"):
-    #         print(f"> {cmd}")
-    #         return os.system(cmd)
+        return cmd
 
 
 @dataclass
 class Run:
     runner: Runner
     source_path: str
-    interpreter: str = ""
+    variant: Optional[Dict] = None
     start_time: float = 0
     end_time: float = 0
     status: int = 0
@@ -104,6 +85,15 @@ class Run:
         return pathlib.Path(self.source_path).name
 
     @property
+    def variant_name(self) -> str:
+        if not self.variant:
+            return ""
+        if "env" in self.variant:
+            return self.variant["env"]
+        if "interpreter" in self.variant:
+            return self.variant["interpreter"]
+
+    @property
     def args(self) -> str:
         source_dir = pathlib.Path(self.source_path).parent
         args_txt = source_dir / "args.txt"
@@ -112,11 +102,16 @@ class Run:
         else:
             return ""
 
-    def start(self):
+    def run(self, cmd):
         self.start_time = time.time()
 
-    def stop(self):
+        with chdir("sandbox"):
+            with local.env(PATH=self.path or PATH):
+                # print(f"> {cmd}")
+                local["sh"]["-c", cmd]()
+
         self.end_time = time.time()
+        self.report()
 
     @property
     def duration(self) -> float:
@@ -125,7 +120,7 @@ class Run:
     def report(self):
         if self.status == 0:
             print(
-                f"{self.source_name} {self.runner.name}/{self.interpreter}: {self.duration}"
+                f"{self.source_name} {self.runner.name}/{self.variant}: {self.duration}"
             )
 
 
@@ -134,14 +129,22 @@ class PyRunner(Runner):
     extension = "py"
     variants = [
         {
-            "interpreter": [
-                "python3.6",
-                "python3.7",
-                "python3.8",
-                "python3.8",
-                "python3.10",
-                "pypy3",
-            ]
+            "interpreter": "python3.6",
+        },
+        {
+            "interpreter": "python3.7",
+        },
+        {
+            "interpreter": "python3.8",
+        },
+        {
+            "interpreter": "python3.8",
+        },
+        {
+            "interpreter": "python3.10",
+        },
+        {
+            "interpreter": "pypy3",
         },
     ]
 
@@ -150,7 +153,8 @@ class LuaRunner(Runner):
     name = "Lua"
     extension = "lua"
     variants = [
-        {"interpreter": ["lua", "luajit"]},
+        {"interpreter": "lua"},
+        {"interpreter": "luajit"},
     ]
 
 
@@ -177,26 +181,25 @@ class CythonRunner(Runner):
     extension = "pyx"
     variants = [
         {
-            "path": [
-                f"envs/cython/bin:{PATH}",
-                f"envs/cython-dev/bin:{PATH}",
-                f"envs/cython-plus/bin:{PATH}",
-            ]
+            "name": "cython",
+            "virtualenv": "cython",
         },
+        {
+            "name": "cython-dev",
+            "virtualenv": "cython-dev",
+        },
+        {
+            "name": "cython-dev",
+            "virtualenv": "cython-dev",
+        },
+        #
+        #     "path": [
+        #         f"envs/cython/bin:{PATH}",
+        #         f"envs/cython-dev/bin:{PATH}",
+        #         f"envs/cython-plus/bin:{PATH}",
+        #     ]
+        # },
     ]
-
-    # def __post_init__(self):
-    #     self.name = "Cython"
-    #     self.extension = "pyx"
-    #     self.variants = [
-    #         {
-    #             "path": [
-    #                 f"envs/cython/bin:{PATH}",
-    #                 f"envs/cython-dev/bin:{PATH}",
-    #                 f"envs/cython-plus/bin:{PATH}",
-    #             ]
-    #         },
-    #     ]
 
     def compile(self, run: Run):
         with local.env(PATH=run.path):
@@ -233,45 +236,6 @@ def all_runners():
 
     return [r() for r in globals().values() if is_runner_subclass(r)]
 
-    # runners = []
-    # ns = globals()
-    # for v in ns.values():
-    #     if not is_runner_subclass(v):
-    #         continue
-    #
-    #     debug(v)
-    #     cls = v
-    #     if cls.variants:
-    #         # TODO: multiples axes
-    #         d = cls.variants[0]
-    #
-    #         if "path" in d:
-    #             for path in d["path"]:
-    #                 runner = cls(path=path)
-    #                 runners.append(runner)
-    #
-    #         elif "interpreter" in d:
-    #             for interpreter in d["interpreter"]:
-    #                 runner = cls(interpreter=interpreter)
-    #                 runners.append(runner)
-    #
-    #     else:
-    #         runner = cls()
-    #         runners.append(runner)
-    #
-    # return runners
-
-    # # debug(runners)
-    #
-    # runners2 = []
-    # for runner in runners:
-    #     if runner.match():
-    #         runners2.append(runner)
-    #
-    # debug(runners2)
-    #
-    # return runners2
-
 
 def run_all(prog_name):
     runners = all_runners()
@@ -281,18 +245,7 @@ def run_all(prog_name):
             if not runner.match(source_path):
                 continue
 
-            print(f"Running runner {runner.name} on {source_path}")
-
             runner.run_all(source_path)
-
-            # runner.prepare_sandbox(source_path)
-            # runner.compile(source_path)
-            # runner.run_all(source_path)
-            #
-            # if runner.status == 0:
-            #     print(
-            #         f"{runner.source_name} {runner.name}/{runner.intepreter}: {runner.duration}"
-            #     )
 
 
 @contextlib.contextmanager
