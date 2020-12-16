@@ -152,16 +152,19 @@ class PyRunner(Runner):
     variants = [
         {
             "interpreter": "python3.7",
+            "virtualenv": "python3.7",
         },
         {
             "interpreter": "python3.8",
+            "virtualenv": "python3.8",
         },
-        {
-            "interpreter": "python3.9",
-        },
-        {
-            "interpreter": "python3.10",
-        },
+        # {
+        #     "interpreter": "python3.9",
+        #     "virtualenv": "python3.9",
+        # },
+        # {
+        #     "interpreter": "python3.10",
+        # },
         {
             "interpreter": "pypy3",
         },
