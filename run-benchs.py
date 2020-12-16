@@ -74,6 +74,7 @@ class Run:
     start_time: float = 0
     end_time: float = 0
     returncode: int = 0
+    error: str = ""
 
     @property
     def prog_name(self) -> str:
@@ -111,26 +112,40 @@ class Run:
     def run(self, cmd):
         self.start_time = time.time()
 
+        error = ""
         if self.virtualenv:
             # env = dict(os.environ)
             # path = f"{os.getcwd()}/envs/{self.virtualenv}/bin:{PATH}"
             # env["PATH"] = path
             cmd[0] = f"{os.getcwd()}/envs/{self.virtualenv}/bin/{cmd[0]}"
-            print(cmd)
-            p = subprocess.run(
-                cmd,
-                cwd="sandbox",
-                # env=env,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-        else:
-            print(cmd)
-            p = subprocess.run(
-                cmd, cwd="sandbox", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-            )
+            # print(cmd)
+            try:
+                p = subprocess.run(
+                    cmd,
+                    cwd="sandbox",
+                    # env=env,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                self.returncode = p.returncode
+            except FileNotFoundError:
+                error = "N/A"
 
-        self.returncode = p.returncode
+        else:
+            # print(cmd)
+            try:
+                p = subprocess.run(
+                    cmd, cwd="sandbox", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                self.returncode = p.returncode
+            except FileNotFoundError:
+                error = "N/A"
+
+        if error:
+            self.error = error
+            self.returncode = -1
+        elif self.returncode != 0:
+            self.error = "ERR"
         self.end_time = time.time()
         self.report()
 
@@ -139,10 +154,15 @@ class Run:
         return self.end_time - self.start_time
 
     def report(self):
+        if self.error:
+            duration = self.error
+        else:
+            duration = f"{self.duration:3.3f}"
+
         print(
             f"{self.source_name:<15} "
             f"{(self.runner.name + '/' + self.variant_name):<20} "
-            f"{self.duration:3.3f}"
+            f"{duration}"
         )
 
 
@@ -186,6 +206,7 @@ class JSRunner(Runner):
     variants = [
         {"interpreter": "node"},
         {"interpreter": "deno"},
+        {"interpreter": "duktape"},
     ]
 
 
