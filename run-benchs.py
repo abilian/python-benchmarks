@@ -73,6 +73,7 @@ class Run:
     variant: Optional[Dict] = None
     start_time: float = 0
     end_time: float = 0
+    returncode: int = 0
 
     @property
     def prog_name(self) -> str:
@@ -111,24 +112,25 @@ class Run:
         self.start_time = time.time()
 
         if self.virtualenv:
-            env = dict(os.environ)
-            path = f"{os.getcwd()}/envs/{self.virtualenv}/bin:{PATH}"
-            env["PATH"] = path
+            # env = dict(os.environ)
+            # path = f"{os.getcwd()}/envs/{self.virtualenv}/bin:{PATH}"
+            # env["PATH"] = path
             cmd[0] = f"{os.getcwd()}/envs/{self.virtualenv}/bin/{cmd[0]}"
+            print(cmd)
             p = subprocess.run(
                 cmd,
                 cwd="sandbox",
-                env=env,
+                # env=env,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-            assert p.returncode == 0
         else:
+            print(cmd)
             p = subprocess.run(
                 cmd, cwd="sandbox", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
             )
-            assert p.returncode == 0
 
+        self.returncode = p.returncode
         self.end_time = time.time()
         self.report()
 
@@ -148,9 +150,6 @@ class PyRunner(Runner):
     name = "Python"
     extension = "py"
     variants = [
-        {
-            "interpreter": "python3.6",
-        },
         {
             "interpreter": "python3.7",
         },
