@@ -183,7 +183,10 @@ class LuaRunner(Runner):
 class JSRunner(Runner):
     name = "JavaScript"
     extension = "js"
-    interpreter = "node"
+    variants = [
+        {"interpreter": "node"},
+        {"interpreter": "deno"},
+    ]
 
 
 class RubyRunner(Runner):
