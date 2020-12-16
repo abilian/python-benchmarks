@@ -1,4 +1,18 @@
 ENVS = [
+    # Regular Python
+    {
+        "python": "python3.9",
+    },
+    {
+        "python": "python3.10",
+    },
+    {
+        "python": "python3.7",
+    },
+    {
+        "python": "python3.8",
+    },
+    # Cython
     {
         "name": "cython",
         "runner": "Cython",
@@ -14,18 +28,4 @@ ENVS = [
         "runner": "Cython",
         "deps": "git+https://github.com/abilian/cythonplus.git",
     },
-    #
-    {
-        "python": "python3.7",
-    },
-    {
-        "python": "python3.8",
-    },
-    {
-        "python": "python3.9",
-    },
-    {
-        "python": "python3.10",
-    },
-
 ]
