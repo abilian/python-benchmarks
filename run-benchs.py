@@ -110,6 +110,10 @@ class Run:
             return ""
 
     def run(self, cmd):
+        if self.error:
+            self.report()
+            return
+
         self.start_time = time.time()
 
         error = ""
@@ -145,7 +149,7 @@ class Run:
             self.error = error
             self.returncode = -1
         elif self.returncode != 0:
-            self.error = "ERR"
+            self.error = "Error"
         self.end_time = time.time()
         self.report()
 
@@ -160,7 +164,7 @@ class Run:
             duration = f"{self.duration:3.3f}"
 
         print(
-            f"{self.source_name:<15} "
+            f"{self.source_name:<20} "
             f"{(self.runner.name + '/' + self.variant_name):<20} "
             f"{duration}"
         )
@@ -241,7 +245,8 @@ class CythonRunner(Runner):
         executable = f"{os.getcwd()}/envs/{run.virtualenv}/bin/cythonize"
         cmd = [executable, "-3", "-bi", run.source_name]
         p = subprocess.run(cmd, cwd="sandbox", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        assert p.returncode == 0
+        if p.returncode != 0:
+            run.error = "Compile error"
 
     def run_cmd(self, run: Run) -> List[str]:
         return ["python3", "-c", f"import {run.prog_name}", run.args]
