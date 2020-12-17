@@ -50,6 +50,7 @@ def fannkuch(n):
                     print( checksum )
                     return maxFlipsCount
             count[r] -= 1
+
 from sys import argv
 n = int(argv[1])
 

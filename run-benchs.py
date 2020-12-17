@@ -9,8 +9,10 @@ import pathlib
 import shutil
 import subprocess
 import time
-from dataclasses import dataclass, Field
+from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
+
+import config
 
 PATH = os.environ["PATH"]
 
@@ -118,11 +120,8 @@ class Run:
 
         error = ""
         if self.virtualenv:
-            # env = dict(os.environ)
-            # path = f"{os.getcwd()}/envs/{self.virtualenv}/bin:{PATH}"
-            # env["PATH"] = path
             cmd[0] = f"{os.getcwd()}/envs/{self.virtualenv}/bin/{cmd[0]}"
-            # print(cmd)
+            print(" ".join(cmd))
             try:
                 p = subprocess.run(
                     cmd,
@@ -136,7 +135,7 @@ class Run:
                 error = "N/A"
 
         else:
-            # print(cmd)
+            print(" ".join(cmd))
             try:
                 p = subprocess.run(
                     cmd, cwd="sandbox", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
@@ -305,8 +304,8 @@ def main():
     for program_dir in sorted(glob.glob("programs/*")):
         prog_name = program_dir.split("/")[1]
 
-        # if prog_name != "richards":
-        #     continue
+        if prog_name in config.SKIP_PROGRAMS:
+            continue
 
         title = f"Running benchmarks for {prog_name}"
         print(title)

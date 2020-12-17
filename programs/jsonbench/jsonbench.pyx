@@ -1,4 +1,3 @@
-from __future__ import print_function
 import json
 import sys
 
@@ -9,7 +8,7 @@ HUGE = ([NESTED[0]] * 1000, 100)
 
 cases = [EMPTY, SIMPLE, NESTED, HUGE]
 
-def main(n):
+cdef main(int n):
     for i in range(n):
         for case in cases:
             data, count = case

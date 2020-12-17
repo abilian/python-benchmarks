@@ -101,6 +101,7 @@ def offset_momentum(ref, bodies=SYSTEM, px=0.0, py=0.0, pz=0.0):
         px -= vx * m
         py -= vy * m
         pz -= vz * m
+
     (r, v, m) = ref
     v[0] = px / m
     v[1] = py / m

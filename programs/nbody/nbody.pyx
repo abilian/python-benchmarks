@@ -100,12 +100,13 @@ cdef void report_energy(bodies=SYSTEM, pairs=PAIRS, double e=0.0):
     print("%.9f" % e)
 
 cdef void offset_momentum(ref, bodies=SYSTEM, double px=0.0, double py=0.0, double pz=0.0):
-    cdef double vx, vy, vz, m 
+    cdef double vx, vy, vz, m
 
     for (r, [vx, vy, vz], m) in bodies:
         px -= vx * m
         py -= vy * m
         pz -= vz * m
+
     (r, v, m) = ref
     v[0] = px / m
     v[1] = py / m

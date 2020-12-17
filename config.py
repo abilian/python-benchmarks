@@ -29,3 +29,5 @@ ENVS = [
         "deps": "git+https://github.com/abilian/cythonplus.git",
     },
 ]
+
+SKIP_PROGRAMS = {"knucleotides"}

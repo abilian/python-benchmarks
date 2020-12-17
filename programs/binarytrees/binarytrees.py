@@ -7,7 +7,7 @@
 
 import sys
 import multiprocessing as mp
-
+import multiprocessing.spawn
 
 def make_tree(i, d):
 
@@ -72,4 +72,6 @@ def main(n, min_depth=4):
           max_depth, check_tree(long_lived_tree)))
 
 
-main(int(sys.argv[1]))
+if __name__ == "__main__":
+    mp.spawn.freeze_support()
+    main(int(sys.argv[1]))
