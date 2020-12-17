@@ -535,4 +535,6 @@ Packet.prototype.toString = function () {
   return "Packet";
 };
 
-runRichards(arguments[0]);
+// runRichards(arguments[0]);
+// Hardcoded to please Deno and Duktape
+runRichards(50);
