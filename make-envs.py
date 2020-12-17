@@ -46,6 +46,7 @@ def install_deps(venv: VirtualEnv):
         local[f"envs/{name}/bin/python"]["-m", "pip", "install", "numpy"]()
         local[f"envs/{name}/bin/python"]["-m", "pip", "install", "llvmlite"]()
         local[f"envs/{name}/bin/python"]["-m", "pip", "install", "numba"]()
+        local[f"envs/{name}/bin/python"]["-m", "pip", "install", "jinja2"]()
 
 
 for env in config.ENVS:

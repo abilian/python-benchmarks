@@ -11,6 +11,7 @@ python = "^3.8"
 devtools = "*"
 plumbum = "^1.6.9"
 # pycairo = "*"
+fire = "^0.3.1"
 # PyGObject = "*"
 
 [tool.poetry.dev-dependencies]

@@ -21,6 +21,7 @@ echo "deb [arch=amd64 signed-by=/usr/share/keyrings/conda-archive-keyring.gpg] h
 apt update
 apt install conda
 ln -sf /opt/conda/bin/conda /usr/local/bin
+conda update -n base -c defaults conda
 
 # Install lua
 apt install -y lua5.3 luajit

@@ -12,6 +12,8 @@ import time
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 
+import fire as fire
+
 import config
 
 PATH = os.environ["PATH"]
@@ -313,13 +315,18 @@ def chdir(dirname=None):
         os.chdir(curdir)
 
 
-def main():
+def main(verbose=False, program=""):
+    global DEBUG
+    DEBUG = verbose
+
     pathlib.Path("sandbox").mkdir(exist_ok=True)
 
     for program_dir in sorted(glob.glob("programs/*")):
         prog_name = program_dir.split("/")[1]
 
         if prog_name in config.SKIP_PROGRAMS:
+            continue
+        if program and prog_name != program:
             continue
 
         title = f"Running benchmarks for {prog_name}"
@@ -332,4 +339,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(main)
