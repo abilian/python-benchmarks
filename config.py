@@ -6,6 +6,13 @@ ENVS = [
     {
         "python": "python3.8",
     },
+    {
+        "python": "python3.7",
+    },
+    {
+        "python": "python3.8",
+        "command": "conda create -p envs/py38-conda -y",
+    },
     # {
     #     "python": "python3.9",
     # },

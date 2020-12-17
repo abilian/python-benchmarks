@@ -181,6 +181,10 @@ class PyRunner(Runner):
             "interpreter": "python3.8",
             "virtualenv": "python3.8",
         },
+        {
+            "interpreter": "python3.8",
+            "virtualenv": "py3.8-conda",
+        },
         # {
         #     "interpreter": "python3.9",
         #     "virtualenv": "python3.9",
@@ -190,6 +194,7 @@ class PyRunner(Runner):
         # },
         {
             "interpreter": "pypy3",
+            "virtualenv": "pypy3",
         },
     ]
 
@@ -217,6 +222,11 @@ class RubyRunner(Runner):
     name = "Ruby"
     extension = "rb"
     interpreter = "ruby"
+    variants = [
+        {"interpreter": "ruby"},
+        {"interpreter": "opal-node"},
+        {"interpreter": "jruby"},
+    ]
 
 
 class PhpRunner(Runner):
@@ -301,6 +311,8 @@ def chdir(dirname=None):
 
 
 def main():
+    pathlib.Path("sandbox").mkdir(exist_ok=True)
+
     for program_dir in sorted(glob.glob("programs/*")):
         prog_name = program_dir.split("/")[1]
 
