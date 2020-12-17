@@ -218,8 +218,8 @@ class JSRunner(Runner):
     extension = "js"
     variants = [
         {"interpreter": "node"},
-        {"interpreter": "deno"},
-        {"interpreter": "duktape"},
+        # {"interpreter": "deno"},
+        {"interpreter": "duk"},
     ]
 
 
