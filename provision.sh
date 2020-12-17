@@ -5,7 +5,7 @@ set -ex
 # Provisionning script for Ubuntu 20.04
 
 # Some build dependencies
-apt install -y llvm
+apt install -y llvm unzip
 
 # Install Python 3.{7,8,9,10} via Deadsnakes
 add-apt-repository -y ppa:deadsnakes/ppa
@@ -24,7 +24,7 @@ echo "deb [arch=amd64 signed-by=/usr/share/keyrings/conda-archive-keyring.gpg] h
 apt update
 apt install -y conda
 ln -sf /opt/conda/bin/conda /usr/local/bin
-conda update -n base -c defaults conda
+conda update -n base -c defaults conda -y
 
 # Install lua
 apt install -y lua5.3 luajit

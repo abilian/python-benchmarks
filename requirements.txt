@@ -1,0 +1,13 @@
+devtools==0.6.1; python_version >= "3.6" \
+    --hash=sha256:7334183972a8d04e81d08b7f62126abca9b6f4de51d825c5fdcb9c88f252601a \
+    --hash=sha256:a054307594d35d28fae8df7629967363e851ae0ac7b2152640a8a401c39d42d7
+fire==0.3.1 \
+    --hash=sha256:9736a16227c3d469e5d2d296bce5b4d8fa8d7851e953bda327a455fc2994307f
+plumbum==1.6.9; (python_version >= "2.6" and python_full_version < "3.0.0") or (python_full_version >= "3.4.0") \
+    --hash=sha256:91418dcc66b58ab9d2e3b04b3d1e0d787dc45923154fb8b4a826bd9316dba0d6 \
+    --hash=sha256:16b9e19d96c80f2e9d051ef5f04927b834a6ac0ce5d2768eb8662b5cd53e43df
+six==1.15.0; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.3.0" \
+    --hash=sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced \
+    --hash=sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259
+termcolor==1.1.0 \
+    --hash=sha256:1d6d69ce66211143803fbc56652b41d73b4a400a2891d7bf7a1cdf4c02de613b
