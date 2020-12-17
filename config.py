@@ -40,4 +40,4 @@ ENVS = [
     },
 ]
 
-SKIP_PROGRAMS = {"knucleotides"}
+SKIP_PROGRAMS = {"knucleotide"}

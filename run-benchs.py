@@ -15,6 +15,7 @@ from typing import List, Dict, Any, Optional
 import config
 
 PATH = os.environ["PATH"]
+DEBUG = False
 
 
 class Runner:
@@ -121,7 +122,8 @@ class Run:
         error = ""
         if self.virtualenv:
             cmd[0] = f"{os.getcwd()}/envs/{self.virtualenv}/bin/{cmd[0]}"
-            print(" ".join(cmd))
+            if DEBUG:
+                print(" ".join(cmd))
             try:
                 p = subprocess.run(
                     cmd,
@@ -135,7 +137,8 @@ class Run:
                 error = "N/A"
 
         else:
-            print(" ".join(cmd))
+            if DEBUG:
+                print(" ".join(cmd))
             try:
                 p = subprocess.run(
                     cmd, cwd="sandbox", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
