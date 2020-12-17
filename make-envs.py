@@ -12,7 +12,7 @@ class VirtualEnv:
     name: str = ""
     runner: str = ""
     deps: str = ""
-    cmd: str = ""
+    command: str = ""
 
     def __post_init__(self):
         if not self.name:
@@ -24,8 +24,8 @@ def create_env(venv: VirtualEnv):
 
     print(f"Creating env {name}...")
 
-    if venv.cmd:
-        os.system(venv.cmd)
+    if venv.command:
+        os.system(venv.command)
     elif venv.python:
         local[venv.python]["-m", "venv", "--copies", "--clear", f"envs/{name}"]()
     else:
