@@ -36,15 +36,13 @@ def create_env(venv: VirtualEnv):
 
 def install_deps(venv: VirtualEnv):
     name = venv.name
-    deps = venv.deps
-    runner = venv.runner
 
     print("Installing deps")
 
-    if deps:
-        local[f"envs/{name}/bin/pip"]["install", deps]()
+    if venv.deps:
+        local[f"envs/{name}/bin/pip"]["install", venv.deps]()
 
-    if runner != "Cython":
+    if venv.runner != "Cython" and venv.python not in {"python3.9", "python3.10"}:
         local[f"envs/{name}/bin/python"]["-m", "pip", "install", "numpy"]()
         local[f"envs/{name}/bin/python"]["-m", "pip", "install", "llvmlite"]()
         local[f"envs/{name}/bin/python"]["-m", "pip", "install", "numba"]()

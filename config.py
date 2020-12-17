@@ -9,9 +9,9 @@ ENVS = [
     {
         "python": "python3.9",
     },
-    {
-        "python": "python3.10",
-    },
+    # {
+    #     "python": "python3.10",
+    # },
     {
         "name": "py38-conda",
         "python": "python3.8",
