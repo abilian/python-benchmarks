@@ -17,10 +17,11 @@ apt install -y python3.7-venv python3.8-venv python3.9-venv python3.10-venv
 apt install -y lua5.3 luajit
 
 # Install JS interpreters
-apt install -y nodejs
+apt install -y nodejs npm
 apt install -y duktape
 curl -fsSL https://deno.land/x/install/install.sh | sh
 cp /root/.deno/bin/deno /usr/local/bin/
 
 # Install Ruby and variants
 apt install -y jruby
+npm install -g opal
