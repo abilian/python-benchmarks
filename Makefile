@@ -1,5 +1,6 @@
 env:
 	python3.8 -m venv env
+	./env/bin/pip install -U pip wheel setuptools
 	./env/bin/pip install -r requirements.txt
 	echo "Now run 'source ./env/bin/activate.{sh|fish}"
 

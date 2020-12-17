@@ -12,11 +12,11 @@ ENVS = [
     # {
     #     "python": "python3.10",
     # },
-    {
-        "name": "py38-conda",
-        "python": "python3.8",
-        "command": "conda create -p envs/py38-conda -y",
-    },
+    # {
+    #     "name": "py38-conda",
+    #     "python": "python3.8",
+    #     "command": "conda create -p envs/py38-conda -y",
+    # },
     {
         "name": "pyjion",
         "python": "python3.9",
