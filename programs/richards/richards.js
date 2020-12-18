@@ -38,11 +38,12 @@
  * operating system.
  **/
 function runRichards(iters) {
-  for (var i = 0; i < iters; i++) {
-    var scheduler = new Scheduler();
+  for (let i = 0; i < iters; i++) {
+    const scheduler = new Scheduler();
     scheduler.addIdleTask(ID_IDLE, 0, null, COUNT);
 
-    var queue = new Packet(null, ID_WORKER, KIND_WORK);
+    let queue;
+    queue = new Packet(null, ID_WORKER, KIND_WORK);
     queue = new Packet(queue, ID_WORKER, KIND_WORK);
     scheduler.addWorkerTask(ID_WORKER, 1000, queue);
 
@@ -66,7 +67,7 @@ function runRichards(iters) {
       scheduler.queueCount != EXPECTED_QUEUE_COUNT ||
       scheduler.holdCount != EXPECTED_HOLD_COUNT
     ) {
-      var msg =
+      const msg =
         "Error during execution: queueCount = " +
         scheduler.queueCount +
         ", holdCount = " +
@@ -77,7 +78,7 @@ function runRichards(iters) {
   }
 }
 
-var COUNT = 10000;
+const COUNT = 10000;
 
 /**
  * These two constants specify how many times a packet is queued and
@@ -86,8 +87,8 @@ var COUNT = 10000;
  * correct run so if the actual queue or hold count is different from
  * the expected there must be a bug in the implementation.
  **/
-var EXPECTED_QUEUE_COUNT = 23246;
-var EXPECTED_HOLD_COUNT = 9297;
+const EXPECTED_QUEUE_COUNT = 23246;
+const EXPECTED_HOLD_COUNT = 9297;
 
 /**
  * A scheduler can be used to schedule a set of tasks based on their relative
@@ -104,16 +105,16 @@ function Scheduler() {
   this.currentId = null;
 }
 
-var ID_IDLE = 0;
-var ID_WORKER = 1;
-var ID_HANDLER_A = 2;
-var ID_HANDLER_B = 3;
-var ID_DEVICE_A = 4;
-var ID_DEVICE_B = 5;
-var NUMBER_OF_IDS = 6;
+const ID_IDLE = 0;
+const ID_WORKER = 1;
+const ID_HANDLER_A = 2;
+const ID_HANDLER_B = 3;
+const ID_DEVICE_A = 4;
+const ID_DEVICE_B = 5;
+const NUMBER_OF_IDS = 6;
 
-var KIND_DEVICE = 0;
-var KIND_WORK = 1;
+const KIND_DEVICE = 0;
+const KIND_WORK = 1;
 
 /**
  * Add an idle task to this scheduler.
@@ -201,7 +202,7 @@ Scheduler.prototype.schedule = function () {
  * @param {int} id the id of the task to suspend
  */
 Scheduler.prototype.release = function (id) {
-  var tcb = this.blocks[id];
+  const tcb = this.blocks[id];
   if (tcb == null) return tcb;
   tcb.markAsNotHeld();
   if (tcb.priority > this.currentTcb.priority) {
@@ -238,7 +239,7 @@ Scheduler.prototype.suspendCurrent = function () {
  * @param {Packet} packet the packet to add
  */
 Scheduler.prototype.queue = function (packet) {
-  var t = this.blocks[packet.id];
+  const t = this.blocks[packet.id];
   if (t == null) return t;
   this.queueCount++;
   packet.link = null;
@@ -272,26 +273,26 @@ function TaskControlBlock(link, id, priority, queue, task) {
 /**
  * The task is running and is currently scheduled.
  */
-var STATE_RUNNING = 0;
+const STATE_RUNNING = 0;
 
 /**
  * The task has packets left to process.
  */
-var STATE_RUNNABLE = 1;
+const STATE_RUNNABLE = 1;
 
 /**
  * The task is not currently running.  The task is not blocked as such and may
  * be started by the scheduler.
  */
-var STATE_SUSPENDED = 2;
+const STATE_SUSPENDED = 2;
 
 /**
  * The task is blocked and cannot be run until it is explicitly released.
  */
-var STATE_HELD = 4;
+const STATE_HELD = 4;
 
-var STATE_SUSPENDED_RUNNABLE = STATE_SUSPENDED | STATE_RUNNABLE;
-var STATE_NOT_HELD = ~STATE_HELD;
+const STATE_SUSPENDED_RUNNABLE = STATE_SUSPENDED | STATE_RUNNABLE;
+const STATE_NOT_HELD = ~STATE_HELD;
 
 TaskControlBlock.prototype.setRunning = function () {
   this.state = STATE_RUNNING;
@@ -321,7 +322,7 @@ TaskControlBlock.prototype.markAsRunnable = function () {
  * Runs this task, if it is ready to be run, and returns the next task to run.
  */
 TaskControlBlock.prototype.run = function () {
-  var packet;
+  let packet;
   if (this.state == STATE_SUSPENDED_RUNNABLE) {
     packet = this.queue;
     this.queue = packet.link;
@@ -400,7 +401,7 @@ function DeviceTask(scheduler) {
 DeviceTask.prototype.run = function (packet) {
   if (packet == null) {
     if (this.v1 == null) return this.scheduler.suspendCurrent();
-    var v = this.v1;
+    const v = this.v1;
     this.v1 = null;
     return this.scheduler.queue(v);
   } else {
@@ -437,7 +438,7 @@ WorkerTask.prototype.run = function (packet) {
     }
     packet.id = this.v1;
     packet.a1 = 0;
-    for (var i = 0; i < DATA_SIZE; i++) {
+    for (let i = 0; i < DATA_SIZE; i++) {
       this.v2++;
       if (this.v2 > 26) this.v2 = 1;
       packet.a2[i] = this.v2;
@@ -470,8 +471,8 @@ HandlerTask.prototype.run = function (packet) {
     }
   }
   if (this.v1 != null) {
-    var count = this.v1.a1;
-    var v;
+    const count = this.v1.a1;
+    let v;
     if (count < DATA_SIZE) {
       if (this.v2 != null) {
         v = this.v2;
@@ -526,7 +527,7 @@ function Packet(link, id, kind) {
 Packet.prototype.addTo = function (queue) {
   this.link = null;
   if (queue == null) return this;
-  var peek,
+  let peek,
     next = queue;
   while ((peek = next.link) != null) next = peek;
   next.link = this;
