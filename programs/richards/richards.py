@@ -89,7 +89,7 @@ class WorkerTaskRec(TaskRec):
 # Task
 
 
-class TaskState(object):
+class TaskState:
     def __init__(self):
         self.packet_pending = True
         self.task_waiting = False
@@ -135,28 +135,13 @@ class TaskState(object):
         return self.packet_pending and self.task_waiting and not self.task_holding
 
 
-tracing = False
-layout = 0
-
-
-def trace(a):
-    global layout
-    layout -= 1
-    if layout <= 0:
-        print
-        layout = 50
-    print(a, end="")
-
-
 TASKTABSIZE = 10
 
 
-class TaskWorkArea(object):
+class TaskWorkArea:
     def __init__(self):
         self.taskTab = [None] * TASKTABSIZE
-
         self.taskList = None
-
         self.holdCount = 0
         self.qpktCount = 0
 
@@ -241,9 +226,6 @@ class Task(TaskState):
 
 
 class DeviceTask(Task):
-    def __init__(self, i, p, w, s, r):
-        Task.__init__(self, i, p, w, s, r)
-
     def fn(self, pkt, r):
         d = r
         assert isinstance(d, DeviceTaskRec)
@@ -256,15 +238,10 @@ class DeviceTask(Task):
                 return self.qpkt(pkt)
         else:
             d.pending = pkt
-            if tracing:
-                trace(pkt.datum)
             return self.hold()
 
 
 class HandlerTask(Task):
-    def __init__(self, i, p, w, s, r):
-        Task.__init__(self, i, p, w, s, r)
-
     def fn(self, pkt, r):
         h = r
         assert isinstance(h, HandlerTaskRec)
@@ -276,6 +253,7 @@ class HandlerTask(Task):
         work = h.work_in
         if work is None:
             return self.waitTask()
+
         count = work.datum
         if count >= BUFSIZE:
             h.work_in = work.link
@@ -346,89 +324,57 @@ class WorkTask(Task):
         return self.qpkt(pkt)
 
 
-import time
-
-
 def schedule():
     t = taskWorkArea.taskList
     while t is not None:
         pkt = None
 
-        if tracing:
-            print("tcb =", t.ident)
-
         if t.isTaskHoldingOrWaiting():
             t = t.link
         else:
-            if tracing:
-                trace(chr(ord("0") + t.ident))
             t = t.runTask()
 
 
-class Richards(object):
-    def run(self, iterations):
-        for i in range(iterations):
-            taskWorkArea.holdCount = 0
-            taskWorkArea.qpktCount = 0
+def run(iterations):
+    for i in range(iterations):
+        taskWorkArea.holdCount = 0
+        taskWorkArea.qpktCount = 0
 
-            IdleTask(I_IDLE, 1, 10000, TaskState().running(), IdleTaskRec())
+        IdleTask(I_IDLE, 1, 10000, TaskState().running(), IdleTaskRec())
 
-            wkq = Packet(None, 0, K_WORK)
-            wkq = Packet(wkq, 0, K_WORK)
-            WorkTask(
-                I_WORK, 1000, wkq, TaskState().waitingWithPacket(), WorkerTaskRec()
-            )
+        wkq = Packet(None, 0, K_WORK)
+        wkq = Packet(wkq, 0, K_WORK)
+        WorkTask(
+            I_WORK, 1000, wkq, TaskState().waitingWithPacket(), WorkerTaskRec()
+        )
 
-            wkq = Packet(None, I_DEVA, K_DEV)
-            wkq = Packet(wkq, I_DEVA, K_DEV)
-            wkq = Packet(wkq, I_DEVA, K_DEV)
-            HandlerTask(
-                I_HANDLERA, 2000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
-            )
+        wkq = Packet(None, I_DEVA, K_DEV)
+        wkq = Packet(wkq, I_DEVA, K_DEV)
+        wkq = Packet(wkq, I_DEVA, K_DEV)
+        HandlerTask(
+            I_HANDLERA, 2000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
+        )
 
-            wkq = Packet(None, I_DEVB, K_DEV)
-            wkq = Packet(wkq, I_DEVB, K_DEV)
-            wkq = Packet(wkq, I_DEVB, K_DEV)
-            HandlerTask(
-                I_HANDLERB, 3000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
-            )
+        wkq = Packet(None, I_DEVB, K_DEV)
+        wkq = Packet(wkq, I_DEVB, K_DEV)
+        wkq = Packet(wkq, I_DEVB, K_DEV)
+        HandlerTask(
+            I_HANDLERB, 3000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
+        )
 
-            wkq = None
-            DeviceTask(I_DEVA, 4000, wkq, TaskState().waiting(), DeviceTaskRec())
-            DeviceTask(I_DEVB, 5000, wkq, TaskState().waiting(), DeviceTaskRec())
+        wkq = None
+        DeviceTask(I_DEVA, 4000, wkq, TaskState().waiting(), DeviceTaskRec())
+        DeviceTask(I_DEVB, 5000, wkq, TaskState().waiting(), DeviceTaskRec())
 
-            schedule()
+        schedule()
 
-            if taskWorkArea.holdCount == 9297 and taskWorkArea.qpktCount == 23246:
-                pass
-            else:
-                return False
-
-        return True
-
-
-def entry_point(iterations):
-    r = Richards()
-    startTime = time.time()
-    result = r.run(iterations)
-    endTime = time.time()
-    return result, startTime, endTime
-
-
-def main(entry_point=entry_point, iterations=10):
-    result, startTime, endTime = entry_point(iterations)
-    if not result:
-        print("Incorrect results!")
-        return -1
-    print(iterations)
-    print("finished.")
-    return 42
+        assert taskWorkArea.holdCount == 9297 and taskWorkArea.qpktCount == 23246
 
 
 if __name__ == "__main__":
     import sys
 
     if len(sys.argv) >= 2:
-        main(iterations=int(sys.argv[1]))
+        run(iterations=int(sys.argv[1]))
     else:
         main()

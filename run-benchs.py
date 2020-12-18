@@ -231,10 +231,11 @@ class JSRunner(Runner):
         {"interpreter": "duk"},
     ]
 
+    # FIXME: hack
     def run_cmd(self, run: Run) -> List[str]:
         variant = run.variant
         interpreter = variant["interpreter"]
-        if interpreter in {"deno", "duk"}:
+        if interpreter == "deno":
             cmd = [interpreter, "run", run.source_name]
         else:
             cmd = [interpreter, run.source_name]
