@@ -208,7 +208,7 @@ class PyRunner(Runner):
             "virtualenv": "pyjion",
         },
         {
-            "interpreter": "pypy3",
+            "interpreter": "python",
             "virtualenv": "pypy3",
         },
         {
