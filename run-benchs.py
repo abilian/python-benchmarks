@@ -231,6 +231,18 @@ class JSRunner(Runner):
         {"interpreter": "duk"},
     ]
 
+    def run_cmd(self, run: Run) -> List[str]:
+        variant = run.variant
+        interpreter = variant["interpreter"]
+        if interpreter in {"deno", "duk"}:
+            cmd = [interpreter, "run", run.source_name]
+        else:
+            cmd = [interpreter, run.source_name]
+
+        if run.args:
+            cmd += run.args.split(" ")
+
+        return cmd
 
 class RubyRunner(Runner):
     name = "Ruby"
