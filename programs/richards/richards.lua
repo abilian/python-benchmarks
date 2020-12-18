@@ -14,7 +14,6 @@ local I_DEVB = 6
 
 local BUFSIZE = 4
 local layout = 0
-local tracing
 local tasktab = {}
 local ascii_0 = 48
 
@@ -68,15 +67,6 @@ local function packet(link, id, kind)
     return {id = id, link = link, kind = kind, a1 = nil, a2 = {}}
 end
 
-local function trace(a)
-    layout = layout - 1
-    if layout <= 0 then
-        io.write("\n")
-        layout = 50
-    end
-    io.write(a)
-end
-
 local task_proto = {}
 
 function task_proto:tick(pkt)
@@ -91,9 +81,6 @@ function task_proto:waitpkt()
 end
 
 function task_proto:run(pkt)
-    if tracing then
-        trace(self.id)
-    end
     local task = self:fn(pkt)
     return task
 end
@@ -326,18 +313,11 @@ local function fn_dev(self, pkt)
         return self:qpkt(pkt)
     else
         self.v1 = pkt
-        if tracing then
-            trace(pkt.a1)
-        end
         return self:hold_self()
     end
 end
 
 local function main(loops)
-    if tracing then
-        print("Benchmark starting")
-    end
-    local t1 = os.clock()
     for i = 1, loops do
         qpktcount = 0
         holdcount = 0
@@ -360,27 +340,11 @@ local function main(loops)
         while devb do
             devb = devb:tick()
         end
-        local results
-        if qpktcount == QPKTCOUNT and holdcount == HOLDCOUNT then
-            results = "correct"
-        else
-            results = "incorrect"
-        end
-        if tracing or results == "incorrect" then
-            print("these results are " .. results)
-        end
-        if tracing then
-            print("\nend of run")
+        if qpktcount ~= QPKTCOUNT and holdcount ~= HOLDCOUNT then
+            error("Incorrect result")
         end
     end
-    local t2 = os.clock()
-    local delta = t2 - t1
-    return delta
 end
 
-loops = tonumber(arg and arg[1]) or 10
-delta = main(loops)
-if tracing then
-    io.write("Time (in seconds): ")
-end
-print(delta)
+loops = tonumber(arg and arg[1]) or 50
+main(loops)
