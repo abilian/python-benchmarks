@@ -7,6 +7,14 @@
 #  Translation from C++, Mario Wolczko
 #  Outer loop added by Alex Jacoby
 
+
+try:
+    import pyjion
+    pyjion.enable()
+except ImportError:
+    pass
+
+
 # Task IDs
 I_IDLE = 1
 I_WORK = 2
@@ -297,9 +305,6 @@ A = ord("A")
 
 
 class WorkTask(Task):
-    def __init__(self, i, p, w, s, r):
-        Task.__init__(self, i, p, w, s, r)
-
     def fn(self, pkt, r):
         w = r
         assert isinstance(w, WorkerTaskRec)
@@ -377,4 +382,4 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2:
         run(iterations=int(sys.argv[1]))
     else:
-        main()
+        run(50)
