@@ -38,4 +38,3 @@ cp /root/.deno/bin/deno /usr/local/bin/
 
 # Install Ruby and variants
 apt install -y jruby
-npm install -g opal

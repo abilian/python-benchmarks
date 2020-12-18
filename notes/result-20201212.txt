@@ -1,0 +1,323 @@
+(env) root@scw-vigilant-ganguly:~/python-benchmarks# ./run-benchs.py
+Running benchmarks for binarytrees
+==================================
+
+binarytrees-6.py     Python/python3.7     1.262
+binarytrees-6.py     Python/python3.8     1.119
+binarytrees-6.py     Python/py3.8-conda   N/A
+binarytrees-6.py     Python/pypy3         N/A
+binarytrees-7.py     Python/python3.7     1.005
+binarytrees-7.py     Python/python3.8     0.955
+binarytrees-7.py     Python/py3.8-conda   N/A
+binarytrees-7.py     Python/pypy3         N/A
+binarytrees-mp.py    Python/python3.7     Error
+binarytrees-mp.py    Python/python3.8     Error
+binarytrees-mp.py    Python/py3.8-conda   N/A
+binarytrees-mp.py    Python/pypy3         N/A
+binarytrees.py       Python/python3.7     1.103
+binarytrees.py       Python/python3.8     0.979
+binarytrees.py       Python/py3.8-conda   N/A
+binarytrees.py       Python/pypy3         N/A
+
+Running benchmarks for chameneosredux
+=====================================
+
+chameneosredux-2.py  Python/python3.7     8.150
+chameneosredux-2.py  Python/python3.8     7.621
+chameneosredux-2.py  Python/py3.8-conda   N/A
+chameneosredux-2.py  Python/pypy3         N/A
+chameneosredux.py    Python/python3.7     6.828
+chameneosredux.py    Python/python3.8     7.336
+chameneosredux.py    Python/py3.8-conda   N/A
+chameneosredux.py    Python/pypy3         N/A
+chameneosredux.pyx   Cython/cython        7.197
+chameneosredux.pyx   Cython/cython-dev    7.054
+chameneosredux.pyx   Cython/cython-plus   6.887
+
+Running benchmarks for fannkuchredux
+====================================
+
+fannkuchredux-2.py   Python/python3.7     0.062
+fannkuchredux-2.py   Python/python3.8     0.037
+fannkuchredux-2.py   Python/py3.8-conda   N/A
+fannkuchredux-2.py   Python/pypy3         N/A
+fannkuchredux-3.py   Python/python3.7     Error
+fannkuchredux-3.py   Python/python3.8     Error
+fannkuchredux-3.py   Python/py3.8-conda   N/A
+fannkuchredux-3.py   Python/pypy3         N/A
+fannkuchredux-4.py   Python/python3.7     Error
+fannkuchredux-4.py   Python/python3.8     Error
+fannkuchredux-4.py   Python/py3.8-conda   N/A
+fannkuchredux-4.py   Python/pypy3         N/A
+fannkuchredux-6.py   Python/python3.7     Error
+fannkuchredux-6.py   Python/python3.8     Error
+fannkuchredux-6.py   Python/py3.8-conda   N/A
+fannkuchredux-6.py   Python/pypy3         N/A
+fannkuchredux.py     Python/python3.7     0.050
+fannkuchredux.py     Python/python3.8     0.040
+fannkuchredux.py     Python/py3.8-conda   N/A
+fannkuchredux.py     Python/pypy3         N/A
+fannkuchredux.pyx    Cython/cython        Error
+fannkuchredux.pyx    Cython/cython-dev    Error
+fannkuchredux.pyx    Cython/cython-plus   Error
+
+Running benchmarks for fasta
+============================
+
+fasta-2.py           Python/python3.7     4.160
+fasta-2.py           Python/python3.8     3.288
+fasta-2.py           Python/py3.8-conda   N/A
+fasta-2.py           Python/pypy3         N/A
+fasta-3.py           Python/python3.7     3.671
+fasta-3.py           Python/python3.8     2.808
+fasta-3.py           Python/py3.8-conda   N/A
+fasta-3.py           Python/pypy3         N/A
+fasta-4.py           Python/python3.7     3.437
+fasta-4.py           Python/python3.8     2.488
+fasta-4.py           Python/py3.8-conda   N/A
+fasta-4.py           Python/pypy3         N/A
+fasta.py             Python/python3.7     4.519
+fasta.py             Python/python3.8     3.476
+fasta.py             Python/py3.8-conda   N/A
+fasta.py             Python/pypy3         N/A
+fasta.pyx            Cython/cython        1.728
+fasta.pyx            Cython/cython-dev    1.917
+fasta.pyx            Cython/cython-plus   1.793
+
+Running benchmarks for fastaredux
+=================================
+
+fastaredux-6.py      Python/python3.7     1.468
+fastaredux-6.py      Python/python3.8     1.600
+fastaredux-6.py      Python/py3.8-conda   N/A
+fastaredux-6.py      Python/pypy3         N/A
+fastaredux-7.py      Python/python3.7     0.280
+fastaredux-7.py      Python/python3.8     0.209
+fastaredux-7.py      Python/py3.8-conda   N/A
+fastaredux-7.py      Python/pypy3         N/A
+fastaredux.py        Python/python3.7     0.268
+fastaredux.py        Python/python3.8     0.216
+fastaredux.py        Python/py3.8-conda   N/A
+fastaredux.py        Python/pypy3         N/A
+fastaredux.pyx       Cython/cython        0.116
+fastaredux.pyx       Cython/cython-dev    0.114
+fastaredux.pyx       Cython/cython-plus   0.134
+
+Running benchmarks for fibonacci
+================================
+
+fibonacci-2.py       Python/python3.7     Error
+fibonacci-2.py       Python/python3.8     Error
+fibonacci-2.py       Python/py3.8-conda   N/A
+fibonacci-2.py       Python/pypy3         N/A
+fibonacci-2.pyx      Cython/cython        Compile error
+fibonacci-2.pyx      Cython/cython-dev    Compile error
+fibonacci-2.pyx      Cython/cython-plus   Compile error
+fibonacci-3.py       Python/python3.7     Error
+fibonacci-3.py       Python/python3.8     Error
+fibonacci-3.py       Python/py3.8-conda   N/A
+fibonacci-3.py       Python/pypy3         N/A
+fibonacci-3.pyx      Cython/cython        Compile error
+fibonacci-3.pyx      Cython/cython-dev    Compile error
+fibonacci-3.pyx      Cython/cython-plus   Compile error
+fibonacci-numba-3.py Python/python3.7     Error
+fibonacci-numba-3.py Python/python3.8     Error
+fibonacci-numba-3.py Python/py3.8-conda   N/A
+fibonacci-numba-3.py Python/pypy3         N/A
+fibonacci-numba.py   Python/python3.7     Error
+fibonacci-numba.py   Python/python3.8     Error
+fibonacci-numba.py   Python/py3.8-conda   N/A
+fibonacci-numba.py   Python/pypy3         N/A
+fibonacci.py         Python/python3.7     Error
+fibonacci.py         Python/python3.8     Error
+fibonacci.py         Python/py3.8-conda   N/A
+fibonacci.py         Python/pypy3         N/A
+fibonacci.pyx        Cython/cython        Error
+fibonacci.pyx        Cython/cython-dev    Error
+fibonacci.pyx        Cython/cython-plus   Error
+
+Running benchmarks for iobench
+==============================
+
+iobench-numba.py     Python/python3.7     5.245
+iobench-numba.py     Python/python3.8     4.239
+iobench-numba.py     Python/py3.8-conda   N/A
+iobench-numba.py     Python/pypy3         N/A
+iobench.py           Python/python3.7     2.359
+iobench.py           Python/python3.8     2.080
+iobench.py           Python/py3.8-conda   N/A
+iobench.py           Python/pypy3         N/A
+
+Running benchmarks for jsonbench
+================================
+
+jsonbench.py         Python/python3.7     5.513
+jsonbench.py         Python/python3.8     4.588
+jsonbench.py         Python/py3.8-conda   N/A
+jsonbench.py         Python/pypy3         N/A
+jsonbench.pyx        Cython/cython        5.449
+jsonbench.pyx        Cython/cython-dev    5.385
+jsonbench.pyx        Cython/cython-plus   5.366
+
+Running benchmarks for mandelbrot
+=================================
+
+mandelbrot.js        JavaScript/node      0.687
+mandelbrot.js        JavaScript/deno      Error
+mandelbrot.js        JavaScript/duk       Error
+mandelbrot.lua       Lua/lua              0.390
+mandelbrot.lua       Lua/luajit           0.017
+mandelbrot.numba.py  Python/python3.7     Error
+mandelbrot.numba.py  Python/python3.8     Error
+mandelbrot.numba.py  Python/py3.8-conda   N/A
+mandelbrot.numba.py  Python/pypy3         N/A
+mandelbrot.py        Python/python3.7     0.580
+mandelbrot.py        Python/python3.8     0.570
+mandelbrot.py        Python/py3.8-conda   N/A
+mandelbrot.py        Python/pypy3         N/A
+mandelbrot.pyx       Cython/cython        Error
+mandelbrot.pyx       Cython/cython-dev    Error
+mandelbrot.pyx       Cython/cython-plus   Error
+
+Running benchmarks for meteor
+=============================
+
+meteor.py            Python/python3.7     3.471
+meteor.py            Python/python3.8     2.735
+meteor.py            Python/py3.8-conda   N/A
+meteor.py            Python/pypy3         N/A
+meteor.pyx           Cython/cython        1.558
+meteor.pyx           Cython/cython-dev    1.568
+meteor.pyx           Cython/cython-plus   1.547
+
+Running benchmarks for nbody
+============================
+
+nbody-numba.py       Python/python3.7     Error
+nbody-numba.py       Python/python3.8     Error
+nbody-numba.py       Python/py3.8-conda   N/A
+nbody-numba.py       Python/pypy3         N/A
+nbody.py             Python/python3.7     3.997
+nbody.py             Python/python3.8     3.954
+nbody.py             Python/py3.8-conda   N/A
+nbody.py             Python/pypy3         N/A
+nbody.pyx            Cython/cython        0.998
+nbody.pyx            Cython/cython-dev    0.995
+nbody.pyx            Cython/cython-plus   0.998
+
+Running benchmarks for pidigits
+===============================
+
+pidigits-2.py        Python/python3.7     Error
+pidigits-2.py        Python/python3.8     Error
+pidigits-2.py        Python/py3.8-conda   N/A
+pidigits-2.py        Python/pypy3         N/A
+pidigits-2.pyx       Cython/cython        Compile error
+pidigits-2.pyx       Cython/cython-dev    Compile error
+pidigits-2.pyx       Cython/cython-plus   Compile error
+pidigits.py          Python/python3.7     3.643
+pidigits.py          Python/python3.8     3.608
+pidigits.py          Python/py3.8-conda   N/A
+pidigits.py          Python/pypy3         N/A
+pidigits.pyx         Cython/cython        3.608
+pidigits.pyx         Cython/cython-dev    3.541
+pidigits.pyx         Cython/cython-plus   3.709
+
+Running benchmarks for pystone
+==============================
+
+pystone.js           JavaScript/node      0.550
+pystone.js           JavaScript/deno      Error
+pystone.js           JavaScript/duk       0.006
+pystone.lua          Lua/lua              0.555
+pystone.lua          Lua/luajit           0.038
+pystone.py           Python/python3.7     0.984
+pystone.py           Python/python3.8     0.951
+pystone.py           Python/py3.8-conda   N/A
+pystone.py           Python/pypy3         N/A
+
+Running benchmarks for regexdna
+===============================
+
+
+Running benchmarks for revcomp
+==============================
+
+
+Running benchmarks for richards
+===============================
+
+richards.js          JavaScript/node      0.673
+richards.js          JavaScript/deno      Error
+richards.js          JavaScript/duk       Error
+richards.lua         Lua/lua              3.786
+richards.lua         Lua/luajit           0.428
+richards.php         PHP/php              N/A
+richards.py          Python/python3.7     9.531
+richards.py          Python/python3.8     7.417
+richards.py          Python/py3.8-conda   N/A
+richards.py          Python/pypy3         N/A
+richards.pyx         Cython/cython        4.553
+richards.pyx         Cython/cython-dev    4.481
+richards.pyx         Cython/cython-plus   4.655
+richards.rb          Ruby/ruby            3.502
+richards.rb          Ruby/opal-node       Error
+richards.rb          Ruby/jruby           5.765
+
+Running benchmarks for spectralnorm
+===================================
+
+spectralnorm-2.py    Python/python3.7     0.280
+spectralnorm-2.py    Python/python3.8     0.241
+spectralnorm-2.py    Python/py3.8-conda   N/A
+spectralnorm-2.py    Python/pypy3         N/A
+spectralnorm-3.py    Python/python3.7     1.498
+spectralnorm-3.py    Python/python3.8     1.444
+spectralnorm-3.py    Python/py3.8-conda   N/A
+spectralnorm-3.py    Python/pypy3         N/A
+spectralnorm-5.py    Python/python3.7     6.584
+spectralnorm-5.py    Python/python3.8     6.017
+spectralnorm-5.py    Python/py3.8-conda   N/A
+spectralnorm-5.py    Python/pypy3         N/A
+spectralnorm-6.py    Python/python3.7     16.066
+spectralnorm-6.py    Python/python3.8     15.539
+spectralnorm-6.py    Python/py3.8-conda   N/A
+spectralnorm-6.py    Python/pypy3         N/A
+spectralnorm-8.py    Python/python3.7     20.828
+spectralnorm-8.py    Python/python3.8     19.584
+spectralnorm-8.py    Python/py3.8-conda   N/A
+spectralnorm-8.py    Python/pypy3         N/A
+
+Running benchmarks for templates
+================================
+
+templates-numba.py   Python/python3.7     Error
+templates-numba.py   Python/python3.8     Error
+templates-numba.py   Python/py3.8-conda   N/A
+templates-numba.py   Python/pypy3         N/A
+templates.py         Python/python3.7     Error
+templates.py         Python/python3.8     Error
+templates.py         Python/py3.8-conda   N/A
+templates.py         Python/pypy3         N/A
+templates.pyx        Cython/cython        Error
+templates.pyx        Cython/cython-dev    Error
+templates.pyx        Cython/cython-plus   Error
+
+Running benchmarks for threadring
+=================================
+
+threadring-2.py      Python/python3.7     13.358
+threadring-2.py      Python/python3.8     14.049
+threadring-2.py      Python/py3.8-conda   N/A
+threadring-2.py      Python/pypy3         N/A
+threadring-3.py      Python/python3.7     Error
+threadring-3.py      Python/python3.8     Error
+threadring-3.py      Python/py3.8-conda   N/A
+threadring-3.py      Python/pypy3         N/A
+threadring.py        Python/python3.7     Error
+threadring.py        Python/python3.8     Error
+threadring.py        Python/py3.8-conda   N/A
+threadring.py        Python/pypy3         N/A
+threadring.pyx       Cython/cython        0.067
+threadring.pyx       Cython/cython-dev    0.073
+threadring.pyx       Cython/cython-plus   0.072

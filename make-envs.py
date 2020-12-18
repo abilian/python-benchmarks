@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import os
 from dataclasses import dataclass
 
@@ -27,9 +28,9 @@ def create_env(venv: VirtualEnv):
     if venv.command:
         os.system(venv.command)
     elif venv.python:
-        local[venv.python]["-m", "venv", "--copies", "--clear", f"envs/{name}"]()
+        local[venv.python]["-m", "venv", "--copies", f"envs/{name}"]()
     else:
-        local["python3.8"]["-m", "venv", "--copies", "--clear", f"envs/{name}"]()
+        local["python3.8"]["-m", "venv", "--copies", f"envs/{name}"]()
 
     local[f"envs/{name}/bin/pip"]["install", "-U", "pip", "wheel", "setuptools"]()
 

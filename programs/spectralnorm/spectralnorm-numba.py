@@ -10,19 +10,18 @@
 # 2to3
 # Sped up with numpy by @tim_1729
 
-from numba.decorators import autojit
-from math      import sqrt
 from sys       import argv
 import numpy
+from numba import jit
 
 
-@autojit
+@jit
 def eval_A(i, j):
     ij = i+j
     return 1.0 / (ij * (ij + 1) / 2 + i + 1)
 
 
-@autojit
+@jit
 def eval_A_times_u(u):
     local_eval_A = eval_A
 
@@ -37,7 +36,7 @@ def eval_A_times_u(u):
     return output
 
 
-@autojit
+@jit
 def eval_At_times_u(u):
     local_eval_A = eval_A
 
@@ -54,7 +53,7 @@ def eval_At_times_u(u):
 
 
 
-@autojit
+@jit
 def eval_AtA_times_u(u):
     return eval_At_times_u(eval_A_times_u(u))
 
@@ -72,6 +71,7 @@ def main():
     vv = numpy.sum( v * v )
 
     print("%0.9f" % (numpy.sqrt(vBv/vv)))
+
 
 if __name__ == "__main__":
     main()

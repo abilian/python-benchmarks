@@ -7,12 +7,11 @@
 # Dirtily sped up by Simon Descarpentries
 # Sped up with numpy by Kittipong Piyawanno
 # 2to3
-
-from numba.decorators import autojit
+from numba import jit
 from sys import argv
 from numpy import *
 
-@autojit
+@jit
 def spectralnorm(n):
 	u = matrix(ones(n))
 	j = arange(n)

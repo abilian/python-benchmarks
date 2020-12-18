@@ -45,13 +45,22 @@ class Runner:
         os.mkdir("sandbox")
         shutil.copy(filename, "sandbox")
 
+    def compile(self, run: Run):
+        cmd = self.compile_cmd(run)
+        if not cmd:
+            return
+
+        p = subprocess.run(cmd, cwd="sandbox", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if p.returncode != 0:
+            run.error = "Compile error"
+
+    def compile_cmd(self, run: Run) -> List[str]:
+        return []
+
     def run(self, run: Run) -> None:
         self.compile(run)
         cmd = self.run_cmd(run)
         run.run(cmd)
-
-    def compile(self, source_name):
-        pass
 
     def run_cmd(self, run: Run) -> List[str]:
         """Default run command.
@@ -229,7 +238,6 @@ class RubyRunner(Runner):
     interpreter = "ruby"
     variants = [
         {"interpreter": "ruby"},
-        {"interpreter": "opal-node"},
         {"interpreter": "jruby"},
     ]
 
@@ -255,28 +263,24 @@ class CythonRunner(Runner):
         },
     ]
 
-    def compile(self, run: Run):
+    def compile_cmd(self, run: Run):
         executable = f"{os.getcwd()}/envs/{run.virtualenv}/bin/cythonize"
-        cmd = [executable, "-3", "-bi", run.source_name]
-        p = subprocess.run(cmd, cwd="sandbox", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        if p.returncode != 0:
-            run.error = "Compile error"
+        return [executable, "-3", "-bi", run.source_name]
 
     def run_cmd(self, run: Run) -> List[str]:
         return ["python3", "-c", f"import {run.prog_name}", run.args]
 
 
-# class CRunner(Runner):
-#     name = "C"
-#     extension = "c"
-#
-#     def compile(self):
-#         cmd = f"gcc -O {self.file_name}"
-#         os.system(cmd)
-#
-#     @property
-#     def run_cmd(self):
-#         return f"./a.out {self.args} > /dev/null"
+class CRunner(Runner):
+    name = "C"
+    extension = "c"
+    interpreter = "gcc"
+
+    def compile_cmd(self, run: Run):
+        return ["gcc", "-O", run.source_name]
+
+    def run_cmd(self, run: Run) -> List[str]:
+        return ["./a.out", run.args]
 
 
 def all_runners():
