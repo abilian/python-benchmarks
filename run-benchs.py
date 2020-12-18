@@ -196,24 +196,25 @@ class PyRunner(Runner):
             "virtualenv": "python3.8",
         },
         {
-            "interpreter": "python3.8",
+            "interpreter": "python3.9",
+            "virtualenv": "python3.9",
+        },
+        {
+            "interpreter": "python",
             "virtualenv": "py3.8-conda",
         },
         {
-            "interpreter": "python3.9",
+            "interpreter": "python",
             "virtualenv": "pyjion",
-        },
-        {
-            "interpreter": "python3.9",
-            "virtualenv": "python3.9",
         },
         {
             "interpreter": "pypy3",
             "virtualenv": "pypy3",
         },
-        # {
-        #     "interpreter": "python3.10",
-        # },
+        {
+            "interpreter": "pyston",
+            "virtualenv": "pyston",
+        },
     ]
 
 
