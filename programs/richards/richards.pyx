@@ -338,9 +338,6 @@ class WorkTask(Task):
         return self.qpkt(pkt)
 
 
-import time
-
-
 def schedule():
     t = taskWorkArea.taskList
     while t is not None:
@@ -355,72 +352,47 @@ def schedule():
             t = t.runTask()
 
 
-class Richards(object):
+def run(int iterations):
+    cdef int i
 
-    def run(self, int iterations):
-        cdef int i
+    for i in range(iterations):
+        taskWorkArea.holdCount = 0
+        taskWorkArea.qpktCount = 0
 
-        for i in range(iterations):
-            taskWorkArea.holdCount = 0
-            taskWorkArea.qpktCount = 0
+        IdleTask(I_IDLE, 1, 10000, TaskState().running(), IdleTaskRec())
 
-            IdleTask(I_IDLE, 1, 10000, TaskState().running(), IdleTaskRec())
+        wkq = Packet(None, 0, K_WORK)
+        wkq = Packet(wkq, 0, K_WORK)
+        WorkTask(
+            I_WORK, 1000, wkq, TaskState().waitingWithPacket(), WorkerTaskRec()
+        )
 
-            wkq = Packet(None, 0, K_WORK)
-            wkq = Packet(wkq, 0, K_WORK)
-            WorkTask(
-                I_WORK, 1000, wkq, TaskState().waitingWithPacket(), WorkerTaskRec()
-            )
+        wkq = Packet(None, I_DEVA, K_DEV)
+        wkq = Packet(wkq, I_DEVA, K_DEV)
+        wkq = Packet(wkq, I_DEVA, K_DEV)
+        HandlerTask(
+            I_HANDLERA, 2000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
+        )
 
-            wkq = Packet(None, I_DEVA, K_DEV)
-            wkq = Packet(wkq, I_DEVA, K_DEV)
-            wkq = Packet(wkq, I_DEVA, K_DEV)
-            HandlerTask(
-                I_HANDLERA, 2000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
-            )
+        wkq = Packet(None, I_DEVB, K_DEV)
+        wkq = Packet(wkq, I_DEVB, K_DEV)
+        wkq = Packet(wkq, I_DEVB, K_DEV)
+        HandlerTask(
+            I_HANDLERB, 3000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
+        )
 
-            wkq = Packet(None, I_DEVB, K_DEV)
-            wkq = Packet(wkq, I_DEVB, K_DEV)
-            wkq = Packet(wkq, I_DEVB, K_DEV)
-            HandlerTask(
-                I_HANDLERB, 3000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
-            )
+        wkq = None
+        DeviceTask(I_DEVA, 4000, wkq, TaskState().waiting(), DeviceTaskRec())
+        DeviceTask(I_DEVB, 5000, wkq, TaskState().waiting(), DeviceTaskRec())
 
-            wkq = None
-            DeviceTask(I_DEVA, 4000, wkq, TaskState().waiting(), DeviceTaskRec())
-            DeviceTask(I_DEVB, 5000, wkq, TaskState().waiting(), DeviceTaskRec())
+        schedule()
 
-            schedule()
-
-            if taskWorkArea.holdCount == 9297 and taskWorkArea.qpktCount == 23246:
-                pass
-            else:
-                return False
-
-        return True
-
-
-def entry_point(int iterations):
-    r = Richards()
-    startTime = time.time()
-    result = r.run(iterations)
-    endTime = time.time()
-    return result, startTime, endTime
-
-
-def main(entry_point=entry_point, int iterations=10):
-    result, startTime, endTime = entry_point(iterations)
-    if not result:
-        print("Incorrect results!")
-        return -1
-    print(iterations)
-    print("finished.")
-    return 42
+        assert taskWorkArea.holdCount == 9297 and taskWorkArea.qpktCount == 23246
 
 
 import sys
 
 if len(sys.argv) >= 2:
-    main(iterations=int(sys.argv[1]))
+    run(int(sys.argv[1]))
 else:
-    main()
+    run(50)
