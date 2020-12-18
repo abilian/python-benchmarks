@@ -100,9 +100,7 @@ void createtask(int id,
                 int pri,
                 struct packet *wkq,
                 int state,
-                struct task *(*fn) (struct packet *),
-                long v1,
-                long v2)
+                struct task *(*fn) (struct packet *), long v1, long v2)
 {
     struct task *t = (struct task *) malloc(sizeof(struct task));
 
