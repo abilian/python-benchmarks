@@ -212,7 +212,7 @@ class PyRunner(Runner):
             "virtualenv": "pypy3",
         },
         {
-            "interpreter": "pyston",
+            "interpreter": "python",
             "virtualenv": "pyston",
         },
     ]
