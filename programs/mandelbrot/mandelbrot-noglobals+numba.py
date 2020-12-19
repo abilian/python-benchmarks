@@ -14,7 +14,7 @@ def mandelbrot():
     K: float = 1.5
     k: float = 1.0
 
-    y = 0
+    y: float = 0
     while y < 150:
         y += 1
         x = 0

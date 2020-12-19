@@ -50,4 +50,7 @@ function mandelbrot()
         end
     end
 end
-mandelbrot()
+
+for i=1,10 do
+    mandelbrot()
+end

@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# coding: utf-8
-
 cdef double h, Z, z, T, t, C, c, U, V, K, k
 
 h = 150
@@ -19,7 +16,7 @@ k = 1.0
 def mandelbrot():
     global h, Z, z, T, t, C, c, U, V
 
-    cdef
+    cdef double y
     y = 0
     while y < 150:
         y += 1
