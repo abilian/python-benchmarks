@@ -1,25 +1,19 @@
-#!/usr/bin/env python3
-# coding: utf-8
+from numba import jit
 
-cdef double h, Z, z, T, t, C, c, U, V, K, k
-
-h = 150
-Z = 0.0  ## Zr
-z = 0.0  ## Zi
-T = 0.0  ## Tr
-t = 0.0  ## Ti
-C = 0.0  ## Cr
-c = 0.0  ## Ci
-U = 0.0
-V = 0.0
-K = 1.5
-k = 1.0
-
-
+@jit
 def mandelbrot():
-    global h, Z, z, T, t, C, c, U, V
+    h: float = 150
+    Z: float = 0.0  ## Zr
+    z: float = 0.0  ## Zi
+    T: float = 0.0  ## Tr
+    t: float = 0.0  ## Ti
+    C: float = 0.0  ## Cr
+    c: float = 0.0  ## Ci
+    U: float = 0.0
+    V: float = 0.0
+    K: float = 1.5
+    k: float = 1.0
 
-    cdef
     y = 0
     while y < 150:
         y += 1
@@ -34,7 +28,6 @@ def mandelbrot():
             C = U - K
             c = V - k
 
-            cdef int i
             i = 0
             while i < 50:
                 i += 1

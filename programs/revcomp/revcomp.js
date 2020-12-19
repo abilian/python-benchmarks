@@ -5,7 +5,7 @@
    modified by 10iii
 */
 
-var line, out, reverseFormat, complement;
+let line, out, reverseFormat, complement;
 
 complement = {
    y: 'R',
@@ -43,13 +43,13 @@ complement = {
 };
 
 reverseFormat = function (a, complement) {
-   var i, j, l, line, c = 1;
-   var printbuff = [];
-   var outbuff = new Array(61);
+   let i, j, l, line, c = 1;
+   let printbuff = [];
+   let outbuff = new Array(61);
    outbuff[0] = '';
-   for (l = a.length; l--;) {
+   for (let l = a.length; l--;) {
       line = a[l];
-      for (i = line.length; i--; c++) {
+      for (let i = line.length; i--; c++) {
          outbuff[c] = complement[line[i]];
          if (c === 60) {
             printbuff.push(outbuff.join(''));
@@ -62,7 +62,7 @@ reverseFormat = function (a, complement) {
       }
    }
    if (c > 1) {
-      for (j = c; j < 61; j++){
+      for (let j = c; j < 61; j++){
          outbuff[j] = '';
       }
       printbuff.push(outbuff.join(''));

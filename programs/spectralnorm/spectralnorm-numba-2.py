@@ -11,16 +11,18 @@ from numba import jit
 from sys import argv
 from numpy import *
 
+
 @jit
 def spectralnorm(n):
-	u = matrix(ones(n))
-	j = arange(n)
-	eval_func = lambda i : 1.0 / ((i + j) * (i + j + 1) / 2 + i + 1)
-	M = matrix([eval_func(i) for i in arange(n)])
-	MT = M.T
-	for i in range (10):
-		v = (u*MT)*M
-		u = (v*MT)*M
-	print("%0.9f" % (sum(u*v.T)/sum(v*v.T))**0.5)
+    u = matrix(ones(n))
+    j = arange(n)
+    eval_func = lambda i: 1.0 / ((i + j) * (i + j + 1) / 2 + i + 1)
+    M = matrix([eval_func(i) for i in arange(n)])
+    MT = M.T
+    for i in range(10):
+        v = (u * MT) * M
+        u = (v * MT) * M
+    print("%0.9f" % (sum(u * v.T) / sum(v * v.T)) ** 0.5)
+
 
 spectralnorm(int(argv[1]))

@@ -13,6 +13,7 @@ from multiprocessing import Pool
 
 def gen_freq(frame) :
     global sequence
+
     frequences = defaultdict(int)
     if frame != 1:
         for ii in range(len(sequence)-frame+1) :

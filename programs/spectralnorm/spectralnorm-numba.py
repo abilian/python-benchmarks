@@ -1,4 +1,3 @@
-
 # The Computer Language Benchmarks Game
 # http://benchmarksgame.alioth.debian.org/
 #
@@ -10,14 +9,14 @@
 # 2to3
 # Sped up with numpy by @tim_1729
 
-from sys       import argv
+from sys import argv
 import numpy
 from numba import jit
 
 
 @jit
 def eval_A(i, j):
-    ij = i+j
+    ij = i + j
     return 1.0 / (ij * (ij + 1) / 2 + i + 1)
 
 
@@ -28,11 +27,11 @@ def eval_A_times_u(u):
     n = u.shape[0]
     # output is n items
     iis = numpy.arange(n)
-    iis = numpy.reshape(iis,(n,1))
+    iis = numpy.reshape(iis, (n, 1))
     j = numpy.arange(n)
-    j = numpy.tile(j,(n,1)) # j is a matrix. Every row is [ 0, 1, 2, ...]
-    u_j = numpy.tile(u,(n,1))
-    output = numpy.sum(local_eval_A(iis,j)*u_j,axis=1)
+    j = numpy.tile(j, (n, 1))  # j is a matrix. Every row is [ 0, 1, 2, ...]
+    u_j = numpy.tile(u, (n, 1))
+    output = numpy.sum(local_eval_A(iis, j) * u_j, axis=1)
     return output
 
 
@@ -44,13 +43,12 @@ def eval_At_times_u(u):
     # output is n items
     # each item is sum of things in loop
     iis = numpy.arange(n)
-    iis = numpy.reshape(iis,(n,1))
+    iis = numpy.reshape(iis, (n, 1))
     j = numpy.arange(n)
-    j = numpy.tile(j,(n,1))
-    u_j = numpy.tile(u,(n,1))
-    output = numpy.sum(local_eval_A(j,iis)*u_j,axis=1)
+    j = numpy.tile(j, (n, 1))
+    u_j = numpy.tile(u, (n, 1))
+    output = numpy.sum(local_eval_A(j, iis) * u_j, axis=1)
     return output
-
 
 
 @jit
@@ -67,10 +65,10 @@ def main():
         v = local_eval_AtA_times_u(u)
         u = local_eval_AtA_times_u(v)
 
-    vBv = numpy.sum( u * v )
-    vv = numpy.sum( v * v )
+    vBv = numpy.sum(u * v)
+    vv = numpy.sum(v * v)
 
-    print("%0.9f" % (numpy.sqrt(vBv/vv)))
+    print("%0.9f" % (numpy.sqrt(vBv / vv)))
 
 
 if __name__ == "__main__":

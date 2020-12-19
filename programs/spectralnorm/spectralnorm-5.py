@@ -9,54 +9,65 @@
 # 2to3
 
 from multiprocessing import Pool
-from math            import sqrt
+from math import sqrt
+from multiprocessing.spawn import freeze_support
 
-from sys             import argv
+from sys import argv
 
-def eval_A (i, j):
+
+def eval_A(i, j):
     return 1.0 / ((i + j) * (i + j + 1) / 2 + i + 1)
 
-def eval_A_times_u (u):
-    args = ((i,u) for i in range(len(u)))
+
+def eval_A_times_u(u):
+    args = ((i, u) for i in range(len(u)))
     return pool.map(part_A_times_u, args)
 
-def eval_At_times_u (u):
-    args = ((i,u) for i in range(len(u)))
+
+def eval_At_times_u(u):
+    args = ((i, u) for i in range(len(u)))
     return pool.map(part_At_times_u, args)
 
-def eval_AtA_times_u (u):
-    return eval_At_times_u (eval_A_times_u (u))
+
+def eval_AtA_times_u(u):
+    return eval_At_times_u(eval_A_times_u(u))
+
 
 def part_A_times_u(xxx_todo_changeme):
-    (i,u) = xxx_todo_changeme
+    (i, u) = xxx_todo_changeme
     partial_sum = 0
     for j, u_j in enumerate(u):
-        partial_sum += eval_A (i, j) * u_j
+        partial_sum += eval_A(i, j) * u_j
     return partial_sum
 
+
 def part_At_times_u(xxx_todo_changeme1):
-    (i,u) = xxx_todo_changeme1
+    (i, u) = xxx_todo_changeme1
     partial_sum = 0
     for j, u_j in enumerate(u):
-        partial_sum += eval_A (j, i) * u_j
+        partial_sum += eval_A(j, i) * u_j
     return partial_sum
+
 
 def main():
     n = int(argv[1])
     u = [1] * n
 
-    for dummy in range (10):
-        v = eval_AtA_times_u (u)
-        u = eval_AtA_times_u (v)
+    for dummy in range(10):
+        v = eval_AtA_times_u(u)
+        u = eval_AtA_times_u(v)
 
     vBv = vv = 0
 
-    for ue, ve in zip (u, v):
+    for ue, ve in zip(u, v):
         vBv += ue * ve
-        vv  += ve * ve
+        vv += ve * ve
 
-    print("%0.9f" % (sqrt(vBv/vv)))
+    print("%0.9f" % (sqrt(vBv / vv)))
+
 
 pool = Pool(processes=4)
-main()
 
+if __name__ == "__main__":
+    freeze_support()
+    main()

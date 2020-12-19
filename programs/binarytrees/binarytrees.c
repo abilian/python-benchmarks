@@ -31,7 +31,7 @@ treeNode *NewTreeNode(treeNode * left, treeNode * right, long item)
     new->item = item;
 
     return new;
-}                               /* NewTreeNode() */
+}
 
 
 long ItemCheck(treeNode * tree)
@@ -40,7 +40,7 @@ long ItemCheck(treeNode * tree)
         return tree->item;
     else
         return tree->item + ItemCheck(tree->left) - ItemCheck(tree->right);
-}                               /* ItemCheck() */
+}
 
 
 treeNode *BottomUpTree(long item, unsigned depth)
@@ -51,7 +51,7 @@ treeNode *BottomUpTree(long item, unsigned depth)
              BottomUpTree(2 * item, depth - 1), item);
     else
         return NewTreeNode(NULL, NULL, item);
-}                               /* BottomUpTree() */
+}
 
 
 void DeleteTree(treeNode * tree)
@@ -62,7 +62,7 @@ void DeleteTree(treeNode * tree)
     }
 
     free(tree);
-}                               /* DeleteTree() */
+}
 
 
 int main(int argc, char *argv[])
@@ -106,12 +106,12 @@ int main(int argc, char *argv[])
             tempTree = BottomUpTree(-i, depth);
             check += ItemCheck(tempTree);
             DeleteTree(tempTree);
-        }                       /* for(i = 1...) */
+        }
 
         printf
             ("%li\t trees of depth %u\t check: %li\n",
              iterations * 2, depth, check);
-    }                           /* for(depth = minDepth...) */
+    }
 
     printf
         ("long lived tree of depth %u\t check: %li\n",
@@ -119,4 +119,4 @@ int main(int argc, char *argv[])
         );
 
     return 0;
-}                               /* main() */
+}

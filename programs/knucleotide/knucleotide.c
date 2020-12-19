@@ -1,45 +1,26 @@
 /* The Computer Language Benchmarks Game
-
    http://shootout.alioth.debian.org/
 
- 
-
    Based on bit encoding idea of C++ contribution of Andrew Moon
-
    Copy task division idea from Java entry, contributed by James McIlree
-
    Contributed by Petr Prokhorenkov
-
    Modified by Stefano Guidoni
-
 */
 
 #include "simple_hash3.h"
 
-
 #include <ctype.h>
-
 #include <malloc.h>
-
 #include <pthread.h>
-
 #include <sched.h>
-
 #include <stdio.h>
-
 #include <stdlib.h>
-
 #include <string.h>
-
 #include <sys/mman.h>
-
 #include <sys/stat.h>
-
 #include <unistd.h>
 
-
 #define HT_SIZE 2000000
-
 
 typedef unsigned char uint8_t;
 const uint8_t selector[] = { -1, 0, -1, 1, 3, -1, -1, 2 };
@@ -49,7 +30,7 @@ const char table[] = { 'A', 'C', 'G', 'T' };
 
 struct ht_node *
 
-ht_find_new(struct ht_ht *ht, ui64 key) 
+ht_find_new(struct ht_ht *ht, ui64 key)
 
 {
 
@@ -57,9 +38,9 @@ ht_find_new(struct ht_ht *ht, ui64 key)
 
     struct ht_node *node = ht->tbl[hash_code];
 
-    
 
-    if (node) 
+
+    if (node)
 
     {
 
@@ -75,9 +56,9 @@ ht_find_new(struct ht_ht *ht, ui64 key)
 
     }
 
-    
 
-    while (node->next) 
+
+    while (node->next)
 
     {
 
@@ -427,7 +408,6 @@ int main(void)
     };
 
 #undef DECLARE_PARAM
-
 
     struct tp *tp = tp_create(7);
 

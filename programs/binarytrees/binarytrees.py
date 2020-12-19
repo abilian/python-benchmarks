@@ -9,8 +9,8 @@ import sys
 import multiprocessing as mp
 import multiprocessing.spawn
 
-def make_tree(i, d):
 
+def make_tree(i, d):
     if d > 0:
         d -= 1
         return (i, make_tree(i, d), make_tree(i + 1, d))
@@ -18,7 +18,6 @@ def make_tree(i, d):
 
 
 def check_tree(node):
-
     (i, l, r) = node
     if l is None:
         return i
@@ -27,14 +26,13 @@ def check_tree(node):
 
 
 def make_check(itde, make=make_tree, check=check_tree):
-
     i, d = itde
     return check(make(i, d))
 
 
 def get_argchunks(i, d, chunksize=5000):
-
     assert chunksize % 2 == 0
+
     chunk = []
     for k in range(1, i + 1):
         chunk.extend([(k, d), (-k, d)])
@@ -46,7 +44,6 @@ def get_argchunks(i, d, chunksize=5000):
 
 
 def main(n, min_depth=4):
-
     max_depth = max(min_depth + 2, n)
     stretch_depth = max_depth + 1
     if mp.cpu_count() > 1:
@@ -55,8 +52,11 @@ def main(n, min_depth=4):
     else:
         chunkmap = map
 
-    print('stretch tree of depth {0}\t check: {1}'.format(
-          stretch_depth, make_check((0, stretch_depth))))
+    print(
+        "stretch tree of depth {0}\t check: {1}".format(
+            stretch_depth, make_check((0, stretch_depth))
+        )
+    )
 
     long_lived_tree = make_tree(0, max_depth)
 
@@ -64,14 +64,19 @@ def main(n, min_depth=4):
     for d in range(min_depth, stretch_depth, 2):
         i = 2 ** (mmd - d)
         cs = 0
-        for argchunk in get_argchunks(i,d):
+        for argchunk in get_argchunks(i, d):
             cs += sum(chunkmap(make_check, argchunk))
-        print('{0}\t trees of depth {1}\t check: {2}'.format(i * 2, d, cs))
+        print("{0}\t trees of depth {1}\t check: {2}".format(i * 2, d, cs))
 
-    print('long lived tree of depth {0}\t check: {1}'.format(
-          max_depth, check_tree(long_lived_tree)))
+    print(
+        "long lived tree of depth {0}\t check: {1}".format(
+            max_depth, check_tree(long_lived_tree)
+        )
+    )
 
 
-if __name__ == "__main__":
-    mp.spawn.freeze_support()
-    main(int(sys.argv[1]))
+# if __name__ == "__main__":
+#     mp.spawn.freeze_support()
+#     main(int(sys.argv[1]))
+
+main(int(sys.argv[1]))

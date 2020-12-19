@@ -6,6 +6,7 @@ import contextlib
 import glob
 import os
 import pathlib
+import re
 import shutil
 import subprocess
 import time
@@ -40,10 +41,16 @@ class Runner:
             run = Run(self, source_path)
             self.run(run)
 
-    def prepare_sandbox(self, filename):
+    def prepare_sandbox(self, source_path):
         shutil.rmtree("sandbox")
         os.mkdir("sandbox")
-        shutil.copy(filename, "sandbox")
+        shutil.copy(source_path, "sandbox")
+
+        # Temps hack
+        m = re.match(r".*/([a-z0-9]+)/[^/]*\.([a-z0-9]+)", source_path)
+        name = m.group(1)
+        ext = m.group(2)
+        shutil.copy(source_path, f"sandbox/{name}.{ext}")
 
     def compile(self, run: Run):
         cmd = self.compile_cmd(run)
@@ -140,10 +147,14 @@ class Run:
                     cmd,
                     cwd="sandbox",
                     # env=env,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
+                    capture_output=True,
                 )
                 self.returncode = p.returncode
+                if DEBUG:
+                    print("Output")
+                    print(p.stdout)
+                    print("Error")
+                    print(p.stderr)
             except FileNotFoundError:
                 error = "N/A"
 
@@ -171,6 +182,9 @@ class Run:
         return self.end_time - self.start_time
 
     def report(self):
+        if self.error == "N/A":
+            return
+
         if self.error:
             duration = self.error
         else:
@@ -284,6 +298,30 @@ class CythonRunner(Runner):
     def compile_cmd(self, run: Run):
         executable = f"{os.getcwd()}/envs/{run.virtualenv}/bin/cythonize"
         return [executable, "-3", "-bi", run.source_name]
+
+    def run_cmd(self, run: Run) -> List[str]:
+        return ["python3", "-c", f"import {run.prog_name}", run.args]
+
+
+class MypycRunner(Runner):
+    name = "Mypyc"
+    extension = "py"
+    variants = [
+        {
+            "virtualenv": "python3.7",
+        },
+        {
+            "virtualenv": "python3.8",
+        },
+        # Doesn't work, currently
+        # {
+        #     "virtualenv": "python3.9",
+        # },
+    ]
+
+    def compile_cmd(self, run: Run):
+        executable = f"{os.getcwd()}/envs/{run.virtualenv}/bin/mypyc"
+        return [executable, f"{run.prog_name}.py"]
 
     def run_cmd(self, run: Run) -> List[str]:
         return ["python3", "-c", f"import {run.prog_name}", run.args]
