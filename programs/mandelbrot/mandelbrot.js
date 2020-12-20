@@ -1,4 +1,8 @@
+const EXPECTED = 8939;
+
 function mandelbrot() {
+  let count = 0;
+
   let h = 150.0;
   let y = 0.0;
   let Z = 0.0;
@@ -42,21 +46,18 @@ function mandelbrot() {
         }
       }
       if (T + t <= 4) {
-        print("*");
-      } else {
-        print("·");
+        count += 1;
       }
     }
   }
+  return count;
 }
 
-// Not done yet
-function print(x) {
-  if (typeof Deno !== "undefined") {
-    Deno.stdout.write(x);
-  } else {
-    process.stdout.write(x);
+
+for (let i = 0; i < 10; i++) {
+  const result = mandelbrot();
+  if (result != EXPECTED) {
+    console.log("Error: got ", result, " expected ", EXPECTED)
+    fail();
   }
 }
-
-for (let i = 0; i < 10; i++) mandelbrot();

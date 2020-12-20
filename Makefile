@@ -12,3 +12,6 @@ format:
 	docformatter -i *.py
 	black *.py
 
+
+push-programs:
+	rsync -e ssh -avz programs chai:python-benchmarks/

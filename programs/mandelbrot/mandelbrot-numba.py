@@ -1,25 +1,28 @@
-#!/usr/bin/env python3
+import sys
 
 from numba import jit
 
-
-h = 150
-Z = 0.0  ## Zr
-z = 0.0  ## Zi
-T = 0.0  ## Tr
-t = 0.0  ## Ti
-C = 0.0  ## Cr
-c = 0.0  ## Ci
-U = 0.0
-V = 0.0
-K = 1.5
-k = 1.0
+EXPECTED = 8939
 
 
 @jit
 def mandelbrot():
-    global h, Z, z, T, t, C, c, U, V
-    y = 0
+    count: int = 0
+
+    h: float = 150
+    Z: float = 0.0  ## Zr
+    z: float = 0.0  ## Zi
+    T: float = 0.0  ## Tr
+    t: float = 0.0  ## Ti
+    C: float = 0.0  ## Cr
+    c: float = 0.0  ## Ci
+    U: float = 0.0
+    V: float = 0.0
+    K: float = 1.5
+    k: float = 1.0
+    i: int = 0
+
+    y: float = 0
     while y < 150:
         y += 1
         x = 0
@@ -46,10 +49,11 @@ def mandelbrot():
                     t = z * z
 
             if T + t <= 4:
-                print("*", end="")
-            else:
-                print("·", end="")
+                count += 1
+
+    return count
 
 
 for i in range(0, 10):
-    mandelbrot()
+    result = mandelbrot()
+    assert result == EXPECTED

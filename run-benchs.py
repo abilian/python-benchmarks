@@ -9,6 +9,7 @@ import pathlib
 import re
 import shutil
 import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
@@ -57,7 +58,12 @@ class Runner:
         if not cmd:
             return
 
-        p = subprocess.run(cmd, cwd="sandbox", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if DEBUG:
+            print(cmd)
+
+        p = subprocess.run(
+            cmd, cwd="sandbox", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
         if p.returncode != 0:
             run.error = "Compile error"
 
@@ -109,6 +115,8 @@ class Run:
     def variant_name(self) -> str:
         if not self.variant:
             return self.runner.interpreter
+        if "name" in self.variant:
+            return self.variant["name"]
         if "virtualenv" in self.variant:
             return self.variant["virtualenv"]
         if "interpreter" in self.variant:
@@ -163,7 +171,10 @@ class Run:
                 print(" ".join(cmd))
             try:
                 p = subprocess.run(
-                    cmd, cwd="sandbox", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                    cmd,
+                    cwd="sandbox",
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                 )
                 self.returncode = p.returncode
             except FileNotFoundError:
@@ -264,6 +275,7 @@ class JSRunner(Runner):
 
         return cmd
 
+
 class RubyRunner(Runner):
     name = "Ruby"
     extension = "rb"
@@ -330,10 +342,19 @@ class MypycRunner(Runner):
 class CRunner(Runner):
     name = "C"
     extension = "c"
-    interpreter = "gcc"
+    variants = [
+        {
+            "name": "gcc",
+        },
+        {
+            "name": "clang",
+        },
+    ]
 
     def compile_cmd(self, run: Run):
-        return ["gcc", "-O", run.source_name]
+        variant = run.variant
+        compiler = variant["name"]
+        return [compiler, "-O3", run.source_name]
 
     def run_cmd(self, run: Run) -> List[str]:
         return ["./a.out", run.args]
