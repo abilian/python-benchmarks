@@ -1,3 +1,5 @@
+import sys
+
 cdef double h, Z, z, T, t, C, c, U, V, K, k
 
 h = 150
@@ -15,13 +17,16 @@ k = 1.0
 
 def mandelbrot():
     global h, Z, z, T, t, C, c, U, V
-
     cdef double y
+    cdef int i
+
     y = 0
     while y < 150:
         y += 1
         x = 0
+
         while x < 150:
+
             x += 1
             Z, z, T, t = 0.0, 0.0, 0.0, 0.0
             U = x * 2
@@ -31,7 +36,6 @@ def mandelbrot():
             C = U - K
             c = V - k
 
-            cdef int i
             i = 0
             while i < 50:
                 i += 1
@@ -45,9 +49,9 @@ def mandelbrot():
                     t = z * z
 
             if T + t <= 4:
-                print("*", end="")
+                sys.stdout.write("*")
             else:
-                print("·", end="")
+                sys.stdout.write(".")
 
 
 for i in range(0, 10):
