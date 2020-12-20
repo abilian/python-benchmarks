@@ -26,13 +26,13 @@ int mandelbrot()
     double Zr, Zi, Cr, Ci, Tr, Ti;
     int count = 0;
 
-    for (y = 0; y < H; ++y) {
-        for (x = 0; x < W; ++x) {
+    for (y = 0; y < H; y++) {
+        for (x = 0; x < W; x++) {
             Zr = Zi = Tr = Ti = 0.0;
             Cr = (2.0 * x / W - 1.5);
             Ci = (2.0 * y / H - 1.0);
 
-            for (i = 0; i < iter && (Tr + Ti <= 4); ++i) {
+            for (i = 0; i < iter && (Tr + Ti <= 4); i++) {
                 Zi = 2.0 * Zr * Zi + Ci;
                 Zr = Tr - Ti + Cr;
                 Tr = Zr * Zr;

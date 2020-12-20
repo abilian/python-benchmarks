@@ -1,12 +1,11 @@
-import sys
-
 from numba import jit
 
 EXPECTED = 8939
 
 
-@jit
-def mandelbrot():
+# @jit(nopython=True)
+@jit(nopython=True, cache=True)
+def mandelbrot() -> int:
     count: int = 0
 
     h: float = 150
@@ -20,12 +19,14 @@ def mandelbrot():
     V: float = 0.0
     K: float = 1.5
     k: float = 1.0
-    i: int = 0
+
+    i: float = 0
 
     y: float = 0
     while y < 150:
         y += 1
-        x = 0
+
+        x: float = 0
         while x < 150:
             x += 1
             Z, z, T, t = 0.0, 0.0, 0.0, 0.0

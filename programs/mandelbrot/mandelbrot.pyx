@@ -2,7 +2,7 @@ EXPECTED = 8939
 
 
 cdef mandelbrot():
-    cdef double h, Z, z, T, t, C, c, U, V, K, k, y
+    cdef double h, Z, z, T, t, C, c, U, V, K, k, x, y
     cdef int i, count
 
     count = 0

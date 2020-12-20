@@ -57,7 +57,6 @@ function mandelbrot() {
 for (let i = 0; i < 10; i++) {
   const result = mandelbrot();
   if (result != EXPECTED) {
-    console.log("Error: got ", result, " expected ", EXPECTED)
-    fail();
+    throw "Error: got " + result + " expected " + EXPECTED;
   }
 }

@@ -16,11 +16,11 @@ def mandelbrot() -> int:
     K: float = 1.5
     k: float = 1.0
 
-    y: int = 0
+    y: float = 0
     while y < 150:
         y += 1
 
-        x: int = 0
+        x: float = 0
         while x < 150:
             x += 1
             Z, z, T, t = 0.0, 0.0, 0.0, 0.0
@@ -31,7 +31,7 @@ def mandelbrot() -> int:
             C = U - K
             c = V - k
 
-            i: int = 0
+            i: float = 0
             while i < 50:
                 i += 1
                 if T + t <= 4:
