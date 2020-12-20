@@ -1,4 +1,7 @@
+import sys
+
 from numba import jit
+
 
 @jit
 def mandelbrot():
@@ -13,6 +16,7 @@ def mandelbrot():
     V: float = 0.0
     K: float = 1.5
     k: float = 1.0
+    i: int = 0
 
     y: float = 0
     while y < 150:
@@ -41,9 +45,9 @@ def mandelbrot():
                     t = z * z
 
             if T + t <= 4:
-                print("*", end="")
+                sys.stdout.write("*")
             else:
-                print("·", end="")
+                sys.stdout.write("·")
 
 
 for i in range(0, 10):
