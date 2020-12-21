@@ -257,6 +257,7 @@ class JSRunner(Runner):
     extension = "js"
     variants = [
         {"interpreter": "node"},
+        {"interpreter": "node-jitless"},
         {"interpreter": "deno"},
         {"interpreter": "duk"},
     ]
@@ -267,6 +268,8 @@ class JSRunner(Runner):
         interpreter = variant["interpreter"]
         if interpreter == "deno":
             cmd = [interpreter, "run", run.source_name]
+        elif interpreter == "node-jitless":
+            cmd = ["node", "--jitless", run.source_name]
         else:
             cmd = [interpreter, run.source_name]
 
