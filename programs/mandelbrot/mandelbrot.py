@@ -1,3 +1,4 @@
+ITERATIONS = 100
 EXPECTED = 8939
 
 
@@ -49,6 +50,6 @@ def mandelbrot() -> int:
     return count
 
 
-for i in range(0, 10):
+for i in range(0, ITERATIONS):
     result = mandelbrot()
     assert result == EXPECTED

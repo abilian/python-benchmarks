@@ -1,9 +1,9 @@
 from numba import jit
 
+ITERATIONS = 100
 EXPECTED = 8939
 
 
-# @jit(nopython=True)
 @jit(nopython=True, cache=True)
 def mandelbrot() -> int:
     count: int = 0
@@ -55,6 +55,6 @@ def mandelbrot() -> int:
     return count
 
 
-for i in range(0, 10):
+for i in range(0, ITERATIONS):
     result = mandelbrot()
     assert result == EXPECTED

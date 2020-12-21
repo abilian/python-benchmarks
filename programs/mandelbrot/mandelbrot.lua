@@ -1,3 +1,4 @@
+ITERATIONS = 100
 EXPECTED = 8939
 
 function mandelbrot()
@@ -55,7 +56,7 @@ function mandelbrot()
     return count
 end
 
-for i = 1, 10 do
+for i = 1, ITERATIONS do
     result = mandelbrot()
     if (result ~= EXPECTED) then
         error(string.format("Expected %d got %d", EXPECTED, result))

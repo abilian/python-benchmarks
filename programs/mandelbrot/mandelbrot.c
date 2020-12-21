@@ -12,7 +12,7 @@
 
 #define W 150
 #define H 150
-#define ITERATIONS 10
+#define ITERATIONS 100
 
 #define EXPECTED 8939
 

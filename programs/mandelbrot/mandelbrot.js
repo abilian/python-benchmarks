@@ -1,3 +1,4 @@
+const ITERATIONS = 100;
 const EXPECTED = 8939;
 
 function mandelbrot() {
@@ -54,7 +55,7 @@ function mandelbrot() {
 }
 
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < ITERATIONS; i++) {
   const result = mandelbrot();
   if (result != EXPECTED) {
     throw "Error: got " + result + " expected " + EXPECTED;

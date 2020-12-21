@@ -1,9 +1,10 @@
+ITERATIONS = 100
 EXPECTED = 8939
 
 
 cdef mandelbrot():
     cdef double h, Z, z, T, t, C, c, U, V, K, k, x, y
-    cdef int i, count
+    cdef long i, count
 
     count = 0
 
@@ -51,6 +52,6 @@ cdef mandelbrot():
     return count
 
 
-for i in range(0, 10):
+for i in range(0, ITERATIONS):
     result = mandelbrot()
     assert result == EXPECTED
