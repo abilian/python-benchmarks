@@ -1,6 +1,18 @@
 ITERATIONS = 100
 EXPECTED = 8939
 
+try:
+    import pyjion
+
+    pyjion.enable()
+except ImportError:
+    pass
+
+try:
+    from numba import jit
+except ImportError:
+    jit = None
+
 
 def mandelbrot() -> int:
     count: int = 0
@@ -48,6 +60,10 @@ def mandelbrot() -> int:
                 count += 1
 
     return count
+
+
+if jit:
+    mandelbrot = jit(nopython=True, cache=True)(mandelbrot)
 
 
 for i in range(0, ITERATIONS):

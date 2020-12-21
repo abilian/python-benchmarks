@@ -12,15 +12,31 @@ ENVS = [
     # {
     #     "python": "python3.10",
     # },
+    #
+    # Accelerated Python
+    #
     # {
-    #     "name": "py38-conda",
+    #     "name": "python3.8-conda",
     #     "python": "python3.8",
-    #     "command": "conda create -p envs/py38-conda -y",
+    #     "command": "conda create -p envs/python3.8-conda -y",
     # },
+    {
+        "name": "python3.8-numba",
+        "python": "python3.8",
+        "deps": "numba",
+    },
     {
         "name": "pyjion",
         "python": "python3.9",
         "deps": "pyjion",
+    },
+    # {
+    #     "name": "graalpython",
+    #     "python": "graalpython",
+    # },
+    {
+        "name": "pypy3",
+        "python": "pypy3",
     },
     # Cython
     {
@@ -37,6 +53,12 @@ ENVS = [
         "name": "cython-plus",
         "runner": "Cython",
         "deps": "git+https://github.com/abilian/cythonplus.git",
+    },
+    # Mypyc
+    {
+        "name": "mypyc",
+        "runner": "Mypyc",
+        "deps": "mypy",
     },
 ]
 

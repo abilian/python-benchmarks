@@ -240,6 +240,10 @@ class PyRunner(Runner):
             "interpreter": "python",
             "virtualenv": "pyston",
         },
+        {
+            "interpreter": "graalpython",
+            "virtualenv": "graalpython",
+        },
     ]
 
 
@@ -323,15 +327,8 @@ class MypycRunner(Runner):
     extension = "py"
     variants = [
         {
-            "virtualenv": "python3.7",
+            "virtualenv": "mypyc",
         },
-        {
-            "virtualenv": "python3.8",
-        },
-        # Doesn't work, currently
-        # {
-        #     "virtualenv": "python3.9",
-        # },
     ]
 
     def compile_cmd(self, run: Run):

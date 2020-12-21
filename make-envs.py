@@ -32,7 +32,8 @@ def create_env(venv: VirtualEnv):
     else:
         local["python3.8"]["-m", "venv", "--copies", f"envs/{name}"]()
 
-    local[f"envs/{name}/bin/pip"]["install", "-U", "pip", "wheel", "setuptools"]()
+    if not "numba" in venv.name:
+        local[f"envs/{name}/bin/pip"]["install", "-U", "pip", "wheel", "setuptools"]()
 
 
 def install_deps(venv: VirtualEnv):
@@ -43,11 +44,14 @@ def install_deps(venv: VirtualEnv):
     if venv.deps:
         local[f"envs/{name}/bin/pip"]["install", venv.deps]()
 
-    if venv.runner != "Cython" and venv.python not in {"python3.9", "python3.10"}:
-        local[f"envs/{name}/bin/python"]["-m", "pip", "install", "numpy"]()
-        local[f"envs/{name}/bin/python"]["-m", "pip", "install", "llvmlite"]()
-        local[f"envs/{name}/bin/python"]["-m", "pip", "install", "numba"]()
+    if not "numba" in venv.name:
         local[f"envs/{name}/bin/python"]["-m", "pip", "install", "jinja2"]()
+
+    # if venv.runner != "Cython" and venv.python not in {"python3.9", "python3.10"}:
+    #     # local[f"envs/{name}/bin/python"]["-m", "pip", "install", "numpy"]()
+    #     # local[f"envs/{name}/bin/python"]["-m", "pip", "install", "llvmlite"]()
+    #     # local[f"envs/{name}/bin/python"]["-m", "pip", "install", "numba"]()
+    #     local[f"envs/{name}/bin/python"]["-m", "pip", "install", "jinja2"]()
 
 
 for env in config.ENVS:
