@@ -10,9 +10,14 @@
 
 try:
     import pyjion
+
     pyjion.enable()
 except ImportError:
     pass
+
+
+ITERATIONS = 50
+EXPECTED = (9297, 23246)
 
 
 # Task IDs
@@ -340,46 +345,43 @@ def schedule():
             t = t.runTask()
 
 
-def run(iterations):
+def run():
+    taskWorkArea.holdCount = 0
+    taskWorkArea.qpktCount = 0
+
+    IdleTask(I_IDLE, 1, 10000, TaskState().running(), IdleTaskRec())
+
+    wkq = Packet(None, 0, K_WORK)
+    wkq = Packet(wkq, 0, K_WORK)
+    WorkTask(I_WORK, 1000, wkq, TaskState().waitingWithPacket(), WorkerTaskRec())
+
+    wkq = Packet(None, I_DEVA, K_DEV)
+    wkq = Packet(wkq, I_DEVA, K_DEV)
+    wkq = Packet(wkq, I_DEVA, K_DEV)
+    HandlerTask(
+        I_HANDLERA, 2000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
+    )
+
+    wkq = Packet(None, I_DEVB, K_DEV)
+    wkq = Packet(wkq, I_DEVB, K_DEV)
+    wkq = Packet(wkq, I_DEVB, K_DEV)
+    HandlerTask(
+        I_HANDLERB, 3000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
+    )
+
+    wkq = None
+    DeviceTask(I_DEVA, 4000, wkq, TaskState().waiting(), DeviceTaskRec())
+    DeviceTask(I_DEVB, 5000, wkq, TaskState().waiting(), DeviceTaskRec())
+
+    schedule()
+
+    return (taskWorkArea.holdCount, taskWorkArea.qpktCount)
+
+
+def main(iterations):
     for i in range(iterations):
-        taskWorkArea.holdCount = 0
-        taskWorkArea.qpktCount = 0
-
-        IdleTask(I_IDLE, 1, 10000, TaskState().running(), IdleTaskRec())
-
-        wkq = Packet(None, 0, K_WORK)
-        wkq = Packet(wkq, 0, K_WORK)
-        WorkTask(
-            I_WORK, 1000, wkq, TaskState().waitingWithPacket(), WorkerTaskRec()
-        )
-
-        wkq = Packet(None, I_DEVA, K_DEV)
-        wkq = Packet(wkq, I_DEVA, K_DEV)
-        wkq = Packet(wkq, I_DEVA, K_DEV)
-        HandlerTask(
-            I_HANDLERA, 2000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
-        )
-
-        wkq = Packet(None, I_DEVB, K_DEV)
-        wkq = Packet(wkq, I_DEVB, K_DEV)
-        wkq = Packet(wkq, I_DEVB, K_DEV)
-        HandlerTask(
-            I_HANDLERB, 3000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
-        )
-
-        wkq = None
-        DeviceTask(I_DEVA, 4000, wkq, TaskState().waiting(), DeviceTaskRec())
-        DeviceTask(I_DEVB, 5000, wkq, TaskState().waiting(), DeviceTaskRec())
-
-        schedule()
-
-        assert taskWorkArea.holdCount == 9297 and taskWorkArea.qpktCount == 23246
+        result = run()
+        assert result == EXPECTED
 
 
-if __name__ == "__main__":
-    import sys
-
-    if len(sys.argv) >= 2:
-        run(iterations=int(sys.argv[1]))
-    else:
-        run(50)
+main(ITERATIONS)

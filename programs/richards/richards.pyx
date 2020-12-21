@@ -7,6 +7,10 @@
 #  Translation from C++, Mario Wolczko
 #  Outer loop added by Alex Jacoby
 
+ITERATIONS = 50
+EXPECTED = (9297, 23246)
+
+
 # Task IDs
 cdef int I_IDLE, I_WORK, I_HANDLERA, I_HANDLERB, I_DEVA, I_DEVB, K_DEV, K_WORK, BUFSIZE
 
@@ -338,13 +342,10 @@ class WorkTask(Task):
         return self.qpkt(pkt)
 
 
-def schedule():
+cdef schedule():
     t = taskWorkArea.taskList
     while t is not None:
         pkt = None
-
-        if tracing:
-            print("tcb =", t.ident)
 
         if t.isTaskHoldingOrWaiting():
             t = t.link
@@ -352,47 +353,45 @@ def schedule():
             t = t.runTask()
 
 
-def run(int iterations):
-    cdef int i
+cdef run():
+    taskWorkArea.holdCount = 0
+    taskWorkArea.qpktCount = 0
 
+    IdleTask(I_IDLE, 1, 10000, TaskState().running(), IdleTaskRec())
+
+    wkq = Packet(None, 0, K_WORK)
+    wkq = Packet(wkq, 0, K_WORK)
+    WorkTask(
+        I_WORK, 1000, wkq, TaskState().waitingWithPacket(), WorkerTaskRec()
+    )
+
+    wkq = Packet(None, I_DEVA, K_DEV)
+    wkq = Packet(wkq, I_DEVA, K_DEV)
+    wkq = Packet(wkq, I_DEVA, K_DEV)
+    HandlerTask(
+        I_HANDLERA, 2000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
+    )
+
+    wkq = Packet(None, I_DEVB, K_DEV)
+    wkq = Packet(wkq, I_DEVB, K_DEV)
+    wkq = Packet(wkq, I_DEVB, K_DEV)
+    HandlerTask(
+        I_HANDLERB, 3000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
+    )
+
+    wkq = None
+    DeviceTask(I_DEVA, 4000, wkq, TaskState().waiting(), DeviceTaskRec())
+    DeviceTask(I_DEVB, 5000, wkq, TaskState().waiting(), DeviceTaskRec())
+
+    schedule()
+
+    return (taskWorkArea.holdCount, taskWorkArea.qpktCount)
+
+
+def main(iterations):
     for i in range(iterations):
-        taskWorkArea.holdCount = 0
-        taskWorkArea.qpktCount = 0
-
-        IdleTask(I_IDLE, 1, 10000, TaskState().running(), IdleTaskRec())
-
-        wkq = Packet(None, 0, K_WORK)
-        wkq = Packet(wkq, 0, K_WORK)
-        WorkTask(
-            I_WORK, 1000, wkq, TaskState().waitingWithPacket(), WorkerTaskRec()
-        )
-
-        wkq = Packet(None, I_DEVA, K_DEV)
-        wkq = Packet(wkq, I_DEVA, K_DEV)
-        wkq = Packet(wkq, I_DEVA, K_DEV)
-        HandlerTask(
-            I_HANDLERA, 2000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
-        )
-
-        wkq = Packet(None, I_DEVB, K_DEV)
-        wkq = Packet(wkq, I_DEVB, K_DEV)
-        wkq = Packet(wkq, I_DEVB, K_DEV)
-        HandlerTask(
-            I_HANDLERB, 3000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
-        )
-
-        wkq = None
-        DeviceTask(I_DEVA, 4000, wkq, TaskState().waiting(), DeviceTaskRec())
-        DeviceTask(I_DEVB, 5000, wkq, TaskState().waiting(), DeviceTaskRec())
-
-        schedule()
-
-        assert taskWorkArea.holdCount == 9297 and taskWorkArea.qpktCount == 23246
+        result = run()
+        assert result == EXPECTED
 
 
-import sys
-
-if len(sys.argv) >= 2:
-    run(int(sys.argv[1]))
-else:
-    run(50)
+main(ITERATIONS)

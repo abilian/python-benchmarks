@@ -15,8 +15,12 @@ based on a Java version:
 """
 
 
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from typing_extensions import Final
+
+
+ITERATIONS = 50
+EXPECTED = (9297, 23246)
 
 
 # Task IDs
@@ -38,15 +42,14 @@ BUFSIZE_RANGE: Final = range(BUFSIZE)
 
 
 class Packet(object):
-
-    def __init__(self, l: Optional['Packet'], i: int, k: int) -> None:
+    def __init__(self, l: Optional["Packet"], i: int, k: int) -> None:
         self.link = l
         self.ident = i
         self.kind = k
         self.datum = 0
         self.data = [0] * BUFSIZE
 
-    def append_to(self, lst: Optional['Packet']) -> 'Packet':
+    def append_to(self, lst: Optional["Packet"]) -> "Packet":
         self.link = None
         if lst is None:
             return self
@@ -59,6 +62,7 @@ class Packet(object):
             p.link = self
             return lst
 
+
 # Task Records
 
 
@@ -67,20 +71,17 @@ class TaskRec(object):
 
 
 class DeviceTaskRec(TaskRec):
-
     def __init__(self) -> None:
         self.pending: Optional[Packet] = None
 
 
 class IdleTaskRec(TaskRec):
-
     def __init__(self) -> None:
         self.control = 1
         self.count = 10000
 
 
 class HandlerTaskRec(TaskRec):
-
     def __init__(self) -> None:
         self.work_in: Optional[Packet] = None
         self.device_in: Optional[Packet] = None
@@ -95,39 +96,39 @@ class HandlerTaskRec(TaskRec):
 
 
 class WorkerTaskRec(TaskRec):
-
     def __init__(self) -> None:
         self.destination = I_HANDLERA
         self.count = 0
+
+
 # Task
 
 
 class TaskState(object):
-
     def __init__(self) -> None:
         self.packet_pending = True
         self.task_waiting = False
         self.task_holding = False
 
-    def packetPending(self) -> 'TaskState':
+    def packetPending(self) -> "TaskState":
         self.packet_pending = True
         self.task_waiting = False
         self.task_holding = False
         return self
 
-    def waiting(self) -> 'TaskState':
+    def waiting(self) -> "TaskState":
         self.packet_pending = False
         self.task_waiting = True
         self.task_holding = False
         return self
 
-    def running(self) -> 'TaskState':
+    def running(self) -> "TaskState":
         self.packet_pending = False
         self.task_waiting = False
         self.task_holding = False
         return self
 
-    def waitingWithPacket(self) -> 'TaskState':
+    def waitingWithPacket(self) -> "TaskState":
         self.packet_pending = True
         self.task_waiting = True
         self.task_holding = False
@@ -153,7 +154,6 @@ TASKTABSIZE: Final = 10
 
 
 class TaskWorkArea(object):
-
     def __init__(self) -> None:
         self.taskTab: List[Optional[Task]] = [None] * TASKTABSIZE
 
@@ -167,9 +167,9 @@ taskWorkArea: Final = TaskWorkArea()
 
 
 class Task(TaskState):
-
-    def __init__(self, i: int, p: int, w: Optional[Packet], initialState: TaskState,
-                 r: TaskRec) -> None:
+    def __init__(
+        self, i: int, p: int, w: Optional[Packet], initialState: TaskState, r: TaskRec
+    ) -> None:
         self.link = taskWorkArea.taskList
         self.ident = i
         self.priority = p
@@ -184,10 +184,10 @@ class Task(TaskState):
         taskWorkArea.taskList = self
         taskWorkArea.taskTab[i] = self
 
-    def fn(self, pkt: Optional[Packet], r: TaskRec) -> Optional['Task']:
+    def fn(self, pkt: Optional[Packet], r: TaskRec) -> Optional["Task"]:
         raise NotImplementedError
 
-    def addPacket(self, p: Packet, old: 'Task') -> 'Task':
+    def addPacket(self, p: Packet, old: "Task") -> "Task":
         if self.input is None:
             self.input = p
             self.packet_pending = True
@@ -197,7 +197,7 @@ class Task(TaskState):
             p.append_to(self.input)
         return old
 
-    def runTask(self) -> Optional['Task']:
+    def runTask(self) -> Optional["Task"]:
         if self.isWaitingWithPacket():
             msg = self.input
             assert msg is not None
@@ -211,16 +211,16 @@ class Task(TaskState):
 
         return self.fn(msg, self.handle)
 
-    def waitTask(self) -> 'Task':
+    def waitTask(self) -> "Task":
         self.task_waiting = True
         return self
 
-    def hold(self) -> Optional['Task']:
+    def hold(self) -> Optional["Task"]:
         taskWorkArea.holdCount += 1
         self.task_holding = True
         return self.link
 
-    def release(self, i: int) -> 'Task':
+    def release(self, i: int) -> "Task":
         t = self.findtcb(i)
         t.task_holding = False
         if t.priority > self.priority:
@@ -228,14 +228,14 @@ class Task(TaskState):
         else:
             return self
 
-    def qpkt(self, pkt: Packet) -> 'Task':
+    def qpkt(self, pkt: Packet) -> "Task":
         t = self.findtcb(pkt.ident)
         taskWorkArea.qpktCount += 1
         pkt.link = None
         pkt.ident = self.ident
         return t.addPacket(pkt, self)
 
-    def findtcb(self, id: int) -> 'Task':
+    def findtcb(self, id: int) -> "Task":
         t = taskWorkArea.taskTab[id]
         if t is None:
             raise Exception("Bad task id %d" % id)
@@ -246,7 +246,6 @@ class Task(TaskState):
 
 
 class DeviceTask(Task):
-
     def fn(self, pkt: Optional[Packet], r: TaskRec) -> Optional[Task]:
         d = r
         assert isinstance(d, DeviceTaskRec)
@@ -263,7 +262,6 @@ class DeviceTask(Task):
 
 
 class HandlerTask(Task):
-
     def fn(self, pkt: Optional[Packet], r: TaskRec) -> Optional[Task]:
         h = r
         assert isinstance(h, HandlerTaskRec)
@@ -289,13 +287,12 @@ class HandlerTask(Task):
         work.datum = count + 1
         return self.qpkt(dev)
 
+
 # IdleTask
 
 
 class IdleTask(Task):
-
-    def __init__(self, i: int, p: int, w: int, s: TaskState,
-                 r: IdleTaskRec) -> None:
+    def __init__(self, i: int, p: int, w: int, s: TaskState, r: IdleTaskRec) -> None:
         Task.__init__(self, i, 0, None, s, r)
 
     def fn(self, pkt: Optional[Packet], r: TaskRec) -> Optional[Task]:
@@ -308,18 +305,17 @@ class IdleTask(Task):
             i.control //= 2
             return self.release(I_DEVA)
         else:
-            i.control = i.control // 2 ^ 0xd008
+            i.control = i.control // 2 ^ 0xD008
             return self.release(I_DEVB)
 
 
 # WorkTask
 
 
-A: Final = ord('A')
+A: Final = ord("A")
 
 
 class WorkTask(Task):
-
     def fn(self, pkt: Optional[Packet], r: TaskRec) -> Optional[Task]:
         w = r
         assert isinstance(w, WorkerTaskRec)
@@ -353,45 +349,43 @@ def schedule() -> None:
             t = t.runTask()
 
 
-def run(iterations: int) -> None:
+def run() -> Tuple[int, int]:
+    taskWorkArea.holdCount = 0
+    taskWorkArea.qpktCount = 0
+
+    IdleTask(I_IDLE, 1, 10000, TaskState().running(), IdleTaskRec())
+
+    wkq: Optional[Packet] = Packet(None, 0, K_WORK)
+    wkq = Packet(wkq, 0, K_WORK)
+    WorkTask(I_WORK, 1000, wkq, TaskState().waitingWithPacket(), WorkerTaskRec())
+
+    wkq = Packet(None, I_DEVA, K_DEV)
+    wkq = Packet(wkq, I_DEVA, K_DEV)
+    wkq = Packet(wkq, I_DEVA, K_DEV)
+    HandlerTask(
+        I_HANDLERA, 2000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
+    )
+
+    wkq = Packet(None, I_DEVB, K_DEV)
+    wkq = Packet(wkq, I_DEVB, K_DEV)
+    wkq = Packet(wkq, I_DEVB, K_DEV)
+    HandlerTask(
+        I_HANDLERB, 3000, wkq, TaskState().waitingWithPacket(), HandlerTaskRec()
+    )
+
+    wkq = None
+    DeviceTask(I_DEVA, 4000, wkq, TaskState().waiting(), DeviceTaskRec())
+    DeviceTask(I_DEVB, 5000, wkq, TaskState().waiting(), DeviceTaskRec())
+
+    schedule()
+
+    return (taskWorkArea.holdCount, taskWorkArea.qpktCount)
+
+
+def main(iterations):
     for i in range(iterations):
-        taskWorkArea.holdCount = 0
-        taskWorkArea.qpktCount = 0
-
-        IdleTask(I_IDLE, 1, 10000, TaskState().running(), IdleTaskRec())
-
-        wkq: Optional[Packet] = Packet(None, 0, K_WORK)
-        wkq = Packet(wkq, 0, K_WORK)
-        WorkTask(I_WORK, 1000, wkq, TaskState(
-        ).waitingWithPacket(), WorkerTaskRec())
-
-        wkq = Packet(None, I_DEVA, K_DEV)
-        wkq = Packet(wkq, I_DEVA, K_DEV)
-        wkq = Packet(wkq, I_DEVA, K_DEV)
-        HandlerTask(I_HANDLERA, 2000, wkq, TaskState(
-        ).waitingWithPacket(), HandlerTaskRec())
-
-        wkq = Packet(None, I_DEVB, K_DEV)
-        wkq = Packet(wkq, I_DEVB, K_DEV)
-        wkq = Packet(wkq, I_DEVB, K_DEV)
-        HandlerTask(I_HANDLERB, 3000, wkq, TaskState(
-        ).waitingWithPacket(), HandlerTaskRec())
-
-        wkq = None
-        DeviceTask(I_DEVA, 4000, wkq,
-                   TaskState().waiting(), DeviceTaskRec())
-        DeviceTask(I_DEVB, 5000, wkq,
-                   TaskState().waiting(), DeviceTaskRec())
-
-        schedule()
-
-        assert taskWorkArea.holdCount == 9297 and taskWorkArea.qpktCount == 23246
+        result = run()
+        assert result == EXPECTED
 
 
-if __name__ == "__main__":
-    import sys
-
-    if len(sys.argv) >= 2:
-        run(iterations=int(sys.argv[1]))
-    else:
-        run(50)
+main(ITERATIONS)
