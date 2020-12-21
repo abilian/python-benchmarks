@@ -48,7 +48,7 @@ class Runner:
         shutil.copy(source_path, "sandbox")
 
         # Temps hack
-        m = re.match(r".*/([a-z0-9]+)/[^/]*\.([a-z0-9]+)", source_path)
+        m = re.match(r".*/([a-z0-9]+?)-?[^/]*/.*?\.([a-z0-9]+)", source_path)
         name = m.group(1)
         ext = m.group(2)
         shutil.copy(source_path, f"sandbox/{name}.{ext}")
@@ -374,10 +374,11 @@ def all_runners():
     return sorted(result, key=lambda x: x.name)
 
 
-def run_all(prog_name):
+def run_all(prog_dir_name):
     runners = all_runners()
 
-    for source_path in sorted(glob.glob(f"programs/{prog_name}/{prog_name}*")):
+    prog_name = prog_dir_name.split("-")[0]
+    for source_path in sorted(glob.glob(f"programs/{prog_dir_name}/{prog_name}*")):
         for runner in runners:
             if not runner.match(source_path):
                 continue
