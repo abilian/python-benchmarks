@@ -5,14 +5,12 @@
 */
 
 public class binarytrees {
+    private final static int DEPTH = 15;
 
     private final static int minDepth = 4;
 
     public static void main(String[] args) {
-        int n = 0;
-        if (args.length > 0) n = Integer.parseInt(args[0]);
-
-        int maxDepth = (minDepth + 2 > n) ? minDepth + 2 : n;
+        int maxDepth = DEPTH;
         int stretchDepth = maxDepth + 1;
 
         int check = (TreeNode.bottomUpTree(0, stretchDepth)).itemCheck();
@@ -59,8 +57,11 @@ public class binarytrees {
 
         private int itemCheck() {
             // if necessary deallocate here
-            if (left == null) return item;
-            else return item + left.itemCheck() - right.itemCheck();
+            if (left == null) {
+                return item;
+            } else {
+                return item + left.itemCheck() - right.itemCheck();
+            }
         }
     }
 }

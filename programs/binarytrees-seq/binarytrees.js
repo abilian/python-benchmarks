@@ -29,27 +29,26 @@ function bottomUpTree(item, depth) {
   }
 }
 
-var minDepth = 4;
-var n = arguments[0];
-var maxDepth = Math.max(minDepth + 2, n);
-var stretchDepth = maxDepth + 1;
+const minDepth = 4;
+const maxDepth = 15;
+const stretchDepth = maxDepth + 1;
 
-var check = bottomUpTree(0, stretchDepth).itemCheck();
-print("stretch tree of depth " + stretchDepth + "\t check: " + check);
+let check = bottomUpTree(0, stretchDepth).itemCheck();
+console.log("stretch tree of depth " + stretchDepth + "\t check: " + check);
 
-var longLivedTree = bottomUpTree(0, maxDepth);
-for (var depth = minDepth; depth <= maxDepth; depth += 2) {
-  var iterations = 1 << (maxDepth - depth + minDepth);
+const longLivedTree = bottomUpTree(0, maxDepth);
+for (let depth = minDepth; depth <= maxDepth; depth += 2) {
+  const iterations = 1 << (maxDepth - depth + minDepth);
 
   check = 0;
-  for (var i = 1; i <= iterations; i++) {
+  for (let i = 1; i <= iterations; i++) {
     check += bottomUpTree(i, depth).itemCheck();
     check += bottomUpTree(-i, depth).itemCheck();
   }
-  print(iterations * 2 + "\t trees of depth " + depth + "\t check: " + check);
+  console.log(iterations * 2 + "\t trees of depth " + depth + "\t check: " + check);
 }
 
-print(
+console.log(
   "long lived tree of depth " +
     maxDepth +
     "\t check: " +

@@ -32,7 +32,6 @@ class Runner:
         return source_name.endswith(f".{self.extension}")
 
     def run_all(self, source_path):
-        self.prepare_sandbox(source_path)
         if self.variants:
             for variant in self.variants:
                 run = Run(self, source_path, variant=variant)
@@ -42,16 +41,21 @@ class Runner:
             run = Run(self, source_path)
             self.run(run)
 
-    def prepare_sandbox(self, source_path):
+    def run(self, run: Run) -> None:
+        self.prepare_sandbox(run)
+        self.compile(run)
+        cmd = self.run_cmd(run)
+        run.run(cmd)
+
+    def prepare_sandbox(self, run: Run):
         shutil.rmtree("sandbox")
         os.mkdir("sandbox")
-        shutil.copy(source_path, "sandbox")
+        shutil.copy(run.source_path, "sandbox")
 
         # Temps hack
-        m = re.match(r".*/([a-z0-9]+?)-?[^/]*/.*?\.([a-z0-9]+)", source_path)
-        name = m.group(1)
-        ext = m.group(2)
-        shutil.copy(source_path, f"sandbox/{name}.{ext}")
+        m = re.match(r".*\.([a-z0-9]+)", run.source_name)
+        ext = m.group(1)
+        shutil.copy(run.source_path, f"sandbox/{run.prog_name}.{ext}")
 
     def compile(self, run: Run):
         cmd = self.compile_cmd(run)
@@ -69,11 +73,6 @@ class Runner:
 
     def compile_cmd(self, run: Run) -> List[str]:
         return []
-
-    def run(self, run: Run) -> None:
-        self.compile(run)
-        cmd = self.run_cmd(run)
-        run.run(cmd)
 
     def run_cmd(self, run: Run) -> List[str]:
         """Default run command.
@@ -105,7 +104,7 @@ class Run:
 
     @property
     def prog_name(self) -> str:
-        return pathlib.Path(self.source_path).parent.name
+        return pathlib.Path(self.source_path).parent.name.split("-")[0]
 
     @property
     def source_name(self) -> str:
@@ -154,7 +153,6 @@ class Run:
                 p = subprocess.run(
                     cmd,
                     cwd="sandbox",
-                    # env=env,
                     capture_output=True,
                 )
                 self.returncode = p.returncode
@@ -202,8 +200,8 @@ class Run:
             duration = f"{self.duration:3.3f}"
 
         print(
-            f"{self.source_name:<20} "
-            f"{(self.runner.name + '/' + self.variant_name):<20} "
+            f"{self.source_name:<30} "
+            f"{(self.runner.name + '/' + self.variant_name):<30} "
             f"{duration}"
         )
 
@@ -213,36 +211,40 @@ class PyRunner(Runner):
     extension = "py"
     variants = [
         {
-            "interpreter": "python3.7",
             "virtualenv": "python3.7",
+            "interpreter": "python3.7",
         },
         {
-            "interpreter": "python3.8",
             "virtualenv": "python3.8",
+            "interpreter": "python3.8",
         },
         {
-            "interpreter": "python3.9",
             "virtualenv": "python3.9",
+            "interpreter": "python3.9",
         },
         {
-            "interpreter": "python",
             "virtualenv": "py3.8-conda",
+            "interpreter": "python",
         },
         {
-            "interpreter": "python",
             "virtualenv": "pyjion",
+            "interpreter": "python",
         },
         {
-            "interpreter": "python",
             "virtualenv": "pypy3",
-        },
-        {
             "interpreter": "python",
-            "virtualenv": "pyston",
         },
         {
-            "interpreter": "graalpython",
+            "virtualenv": "pyston",
+            "interpreter": "python",
+        },
+        {
+            "virtualenv": "ppci",
+            "interpreter": "python",
+        },
+        {
             "virtualenv": "graalpython",
+            "interpreter": "graalpython",
         },
     ]
 
@@ -333,7 +335,7 @@ class MypycRunner(Runner):
 
     def compile_cmd(self, run: Run):
         executable = f"{os.getcwd()}/envs/{run.virtualenv}/bin/mypyc"
-        return [executable, f"{run.prog_name}.py"]
+        return [executable, "--ignore-missing-imports", f"{run.prog_name}.py"]
 
     def run_cmd(self, run: Run) -> List[str]:
         return ["python3", "-c", f"import {run.prog_name}", run.args]
@@ -354,10 +356,23 @@ class CRunner(Runner):
     def compile_cmd(self, run: Run):
         variant = run.variant
         compiler = variant["name"]
-        return [compiler, "-O3", run.source_name]
+        return [compiler, "-O3", run.source_name, "-lm"]
 
     def run_cmd(self, run: Run) -> List[str]:
         return ["./a.out", run.args]
+
+
+class JavaRunner(Runner):
+    name = "Java"
+    extension = "java"
+    interpreter = "java"
+
+    def compile_cmd(self, run: Run):
+        return ["javac", run.source_name]
+
+    def run_cmd(self, run: Run) -> List[str]:
+        package_name = run.source_name.split(".")[0]
+        return ["java", package_name]
 
 
 def all_runners():
@@ -374,8 +389,11 @@ def all_runners():
     return sorted(result, key=lambda x: x.name)
 
 
-def run_all(prog_dir_name):
+def run_all(prog_dir_name, runner=""):
     runners = all_runners()
+
+    if runner:
+        runners = [r for r in runners if r.name == runner]
 
     prog_name = prog_dir_name.split("-")[0]
     for source_path in sorted(glob.glob(f"programs/{prog_dir_name}/{prog_name}*")):
@@ -397,7 +415,7 @@ def chdir(dirname=None):
         os.chdir(curdir)
 
 
-def main(verbose=False, program=""):
+def main(verbose=False, program="", runner=""):
     global DEBUG
     DEBUG = verbose
 
@@ -415,7 +433,7 @@ def main(verbose=False, program=""):
         print(title)
         print("=" * len(title))
         print()
-        run_all(prog_name)
+        run_all(prog_name, runner=runner)
 
         print()
 

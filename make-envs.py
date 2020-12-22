@@ -3,6 +3,7 @@
 import os
 from dataclasses import dataclass
 
+import fire
 from plumbum import local
 import config
 
@@ -54,7 +55,15 @@ def install_deps(venv: VirtualEnv):
     #     local[f"envs/{name}/bin/python"]["-m", "pip", "install", "jinja2"]()
 
 
-for env in config.ENVS:
-    venv = VirtualEnv(**env)
-    create_env(venv)
-    install_deps(venv)
+def main(env=""):
+    for env_dict in config.ENVS:
+        venv = VirtualEnv(**env_dict)
+        if env and env != venv.name:
+            continue
+
+        create_env(venv)
+        install_deps(venv)
+
+
+if __name__ == "__main__":
+    fire.Fire(main)

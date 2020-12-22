@@ -2,7 +2,7 @@
 from devtools import debug
 from ppci.lang.python import python_to_wasm
 
-prog = open("playground/mandelbrot.py").read()
+prog = open("playground/mandelbrot-wasm.py").read()
 
 r = python_to_wasm(prog)
 debug(r)

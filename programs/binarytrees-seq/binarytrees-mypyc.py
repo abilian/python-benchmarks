@@ -4,8 +4,9 @@ https://benchmarksgame-team.pages.debian.net/benchmarksgame/performance/binarytr
 """
 
 import gc
-import sys
 
+
+DEPTH = 15
 
 class Tree:
     def __init__(self, depth: int) -> None:
@@ -24,11 +25,13 @@ class Tree:
             return 1
 
 
-def main(n: int, min_depth: int=4) -> None:
+def main(max_depth: int) -> None:
     # If unadjusted, most time will be spent doing GC.
-    gc.set_threshold(10000)
+    # Doesn't work with some variants (e.g. pypy)
+    # gc.set_threshold(10000)
+    gc.disable()
 
-    max_depth = max(min_depth + 2, n)
+    min_depth = 4
     stretch_depth = max_depth + 1
 
     print(
@@ -55,7 +58,4 @@ def main(n: int, min_depth: int=4) -> None:
     )
 
 
-# if __name__ == "__main__":
-#     main(int(sys.argv[1]))
-
-main(int(sys.argv[1]))
+main(DEPTH)

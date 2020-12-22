@@ -30,6 +30,11 @@ ENVS = [
         "python": "python3.9",
         "deps": "pyjion",
     },
+    {
+        "name": "ppci",
+        "python": "python3.8",
+        "deps": "git+https://github.com/windelbouwman/ppci.git",
+    },
     # {
     #     "name": "graalpython",
     #     "python": "graalpython",

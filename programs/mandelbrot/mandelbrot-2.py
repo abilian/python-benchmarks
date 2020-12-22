@@ -1,10 +1,19 @@
-from numba import jit
-
 ITERATIONS = 100
 EXPECTED = 8939
 
+try:
+    import pyjion
 
-@jit(nopython=True, cache=True)
+    pyjion.enable()
+except ImportError:
+    pass
+
+try:
+    from numba import jit
+except ImportError:
+    jit = None
+
+
 def mandelbrot() -> int:
     count: int = 0
 
@@ -15,12 +24,8 @@ def mandelbrot() -> int:
     t: float = 0.0  ## Ti
     C: float = 0.0  ## Cr
     c: float = 0.0  ## Ci
-    U: float = 0.0
-    V: float = 0.0
     K: float = 1.5
     k: float = 1.0
-
-    i: float = 0
 
     y: float = 0
     while y < 150:
@@ -30,22 +35,16 @@ def mandelbrot() -> int:
         while x < 150:
             x += 1
             Z, z, T, t = 0.0, 0.0, 0.0, 0.0
-            U = x * 2
-            U /= h
-            V = y * 2
-            V /= h
-            C = U - K
-            c = V - k
 
-            i = 0
+            C = (x * 2) / h - K
+            c = (y * 2) / h- k
+
+            i: float = 0
             while i < 50:
                 i += 1
                 if T + t <= 4:
-                    z = Z * z
-                    z *= 2
-                    z += c
-                    Z = T - t
-                    Z += C
+                    z = (Z * z) * 2 + c
+                    Z = T - t + C
                     T = Z * Z
                     t = z * z
 
@@ -53,6 +52,10 @@ def mandelbrot() -> int:
                 count += 1
 
     return count
+
+
+if jit:
+    mandelbrot = jit(nopython=True, cache=True)(mandelbrot)
 
 
 for i in range(0, ITERATIONS):
