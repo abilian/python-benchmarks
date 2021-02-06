@@ -6,11 +6,12 @@
 import sys
 import gmpy2
 
+
 if not hasattr(gmpy2, 'pi'):
     gmpy2.pi = gmpy2.const_pi
 
-def get_pistring(n, pi=gmpy2.pi):
 
+def get_pistring(n, pi=gmpy2.pi):
     return str(pi(int(3.35 * n))).replace('.', '')[0 : n]
 
 
