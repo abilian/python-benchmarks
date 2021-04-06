@@ -1,8 +1,11 @@
+# metadata:
+# builder: ppci
+# /metadata
+
 ITERATIONS = 100
 EXPECTED = 8939
 
 from ppci.lang.python import jit
-
 
 
 @jit
@@ -52,7 +55,6 @@ def mandelbrot() -> int:
                 count += 1
 
     return count
-
 
 
 for i in range(0, ITERATIONS):
