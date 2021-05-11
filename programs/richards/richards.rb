@@ -1,47 +1,49 @@
 # Derived from http://pws.prserv.net/dlissett/ben/bench1.htm
 # Licensed CC BY-NC-SA 1.0
 
-IDLE = 0  
-WORKER = 1  
-HANDLERA = 2  
-HANDLERB = 3  
-DEVICEA = 4  
-DEVICEB = 5 
+ITERATIONS = 50
+
+IDLE = 0
+WORKER = 1
+HANDLERA = 2
+HANDLERB = 3
+DEVICEA = 4
+DEVICEB = 5
 
 MAXTASKS = 6
 $layout = 0
 
 
 def main()
-   reps = Integer(ARGV.shift || 10)
-   
+   reps = ITERATIONS
+
    startTicks = Process.times.utime
-   
-   s = Scheduler.new 
-   for i in 0..reps 
+
+   s = Scheduler.new
+   for i in 0..reps
      s.reset
      s.addIdleTask(IDLE, 0, nil, 10000)
 
      wkq = Packet.new(nil, WORKER, Packet::WORK)
-     wkq = Packet.new(wkq, WORKER, Packet::WORK)   
+     wkq = Packet.new(wkq, WORKER, Packet::WORK)
      s.addWorkerTask(WORKER, 1000, wkq)
 
      wkq = Packet.new(nil, DEVICEA, Packet::DEVICE)
-     wkq = Packet.new(wkq, DEVICEA, Packet::DEVICE)  
-     wkq = Packet.new(wkq, DEVICEA, Packet::DEVICE)       
-     s.addHandlerTask(HANDLERA, 2000, wkq)   
+     wkq = Packet.new(wkq, DEVICEA, Packet::DEVICE)
+     wkq = Packet.new(wkq, DEVICEA, Packet::DEVICE)
+     s.addHandlerTask(HANDLERA, 2000, wkq)
 
      wkq = Packet.new(nil, DEVICEB, Packet::DEVICE)
-     wkq = Packet.new(wkq, DEVICEB, Packet::DEVICE)  
-     wkq = Packet.new(wkq, DEVICEB, Packet::DEVICE) 
-     s.addHandlerTask(HANDLERB, 3000, wkq)  
+     wkq = Packet.new(wkq, DEVICEB, Packet::DEVICE)
+     wkq = Packet.new(wkq, DEVICEB, Packet::DEVICE)
+     s.addHandlerTask(HANDLERB, 3000, wkq)
 
-     s.addDeviceTask(DEVICEA, 4000, nil) 
-     s.addDeviceTask(DEVICEB, 5000, nil)           
+     s.addDeviceTask(DEVICEA, 4000, nil)
+     s.addDeviceTask(DEVICEB, 5000, nil)
      s.schedule
    end
-   
-   stopTicks = Process.times.utime  
+
+   stopTicks = Process.times.utime
    frequency = 1000
    print "Total time for #{reps} iterations: #{stopTicks-startTicks}s\n"
    print "Average time per iteration: #{Integer(((stopTicks-startTicks)/reps)*1000)}ms\n"
@@ -63,18 +65,18 @@ class Scheduler
 
    def initialize()
       @table = Array.new(MAXTASKS,nil)
-      @list = nil 
+      @list = nil
       @queueCount = 0
       @holdCount = 0
-   end   
-   
+   end
+
    def reset()
       @table = Array.new(MAXTASKS,nil)
       @list = nil
       @queueCount = 0
       @holdCount = 0
    end
-   
+
    def holdCurrent
       @holdCount += 1
       @currentTcb.held
@@ -87,60 +89,60 @@ class Scheduler
          @queueCount += 1
          packet.link = nil
          packet.id = @currentId
-         task.checkPriorityAdd(@currentTcb,packet)                
+         task.checkPriorityAdd(@currentTcb,packet)
       else
          task
-      end     
+      end
    end
-   
+
    def release(id)
       task = @table.at(id)
-      task.notHeld      
-      if task.pri > @currentTcb.pri 
+      task.notHeld
+      if task.pri > @currentTcb.pri
          task
       else
          @currentTcb
-      end                   
-   end 
-   
+      end
+   end
+
    def schedule()
       @currentTcb = @list
-      while @currentTcb # not nil        
-         if @currentTcb.isHeldOrSuspended?     
+      while @currentTcb # not nil
+         if @currentTcb.isHeldOrSuspended?
             @currentTcb = @currentTcb.link
-         else           
-            @currentId = @currentTcb.id                     
-            # trace(@currentId + 1) #TRACE         
+         else
+            @currentId = @currentTcb.id
+            # trace(@currentId + 1) #TRACE
             @currentTcb = @currentTcb.run
-         end           
-      end                  
+         end
+      end
    end
-   
+
    def suspendCurrent()
       @currentTcb.suspended
-   end   
-   
+   end
+
    def addDeviceTask(id,pri,wkq)
       createTcb(id,pri,wkq, DeviceTask.new(self))
    end
-   
+
    def addHandlerTask(id,pri,wkq)
       createTcb(id,pri,wkq, HandlerTask.new(self))
-   end      
-   
+   end
+
    def addIdleTask(id,pri,wkq,count)
       createRunningTcb(id,pri,wkq, IdleTask.new(self,1,count))
-   end   
-  
+   end
+
    def addWorkerTask(id,pri,wkq)
       createTcb(id,pri,wkq, WorkerTask.new(self,HANDLERA,0))
-   end     
-   
+   end
+
    def createRunningTcb(id,pri,wkq,task)
       createTcb(id,pri,wkq,task)
       @currentTcb.setRunning
    end
-   
+
    def createTcb(id,pri,wkq,task)
       @currentTcb = Tcb.new(@list,id,pri,wkq,task)
       @list = @currentTcb
@@ -151,124 +153,124 @@ end
 
 class DeviceTask
    def initialize(scheduler)
-      @scheduler = scheduler  
-   end   
+      @scheduler = scheduler
+   end
 
-   def run(packet)   
+   def run(packet)
       if packet # not nil
-         @v1 = packet       
-         # trace(packet.a1.chr) #TRACE       
-         @scheduler.holdCurrent                                    
+         @v1 = packet
+         # trace(packet.a1.chr) #TRACE
+         @scheduler.holdCurrent
       else
          if @v1 # not nil
             pkt = @v1
-            @v1 = nil           
-            @scheduler.queue(pkt) 
-         else           
-            @scheduler.suspendCurrent          
-         end                        
-      end           
-   end   
+            @v1 = nil
+            @scheduler.queue(pkt)
+         else
+            @scheduler.suspendCurrent
+         end
+      end
+   end
 end
 
 
-class HandlerTask   
+class HandlerTask
    def initialize(scheduler)
-      @scheduler = scheduler  
-   end   
+      @scheduler = scheduler
+   end
 
-   def run(packet)   
-      if packet # not nil    
+   def run(packet)
+      if packet # not nil
          if packet.kind == Packet::WORK
-            @v1 = packet.addTo(@v1)             
+            @v1 = packet.addTo(@v1)
          else
-            @v2 = packet.addTo(@v2)                    
-         end   
-      end   
-      if @v1 # not nil               
+            @v2 = packet.addTo(@v2)
+         end
+      end
+      if @v1 # not nil
          if (count = @v1.a1) < 4
             if @v2 # not nil
                v = @v2
                @v2 = @v2.link
                v.a1 = @v1.a2.at(count)
-               @v1.a1 = count+1                
+               @v1.a1 = count+1
                return @scheduler.queue(v)
-            end         
+            end
          else
             v = @v1
-            @v1 = @v1.link          
-            return @scheduler.queue(v) 
-         end                                               
-      end      
-      @scheduler.suspendCurrent      
+            @v1 = @v1.link
+            return @scheduler.queue(v)
+         end
+      end
+      @scheduler.suspendCurrent
    end
 end
 
 
-class IdleTask   
+class IdleTask
    def initialize(scheduler,v1,v2)
       @scheduler = scheduler
       @v1 = v1
-      @v2 = v2   
-   end   
+      @v2 = v2
+   end
 
-   def run(packet)       
-      if ( @v2 -= 1 ).zero?    
-         @scheduler.holdCurrent       
-      else    
-         if (@v1 & 1).zero? 
-            @v1 >>= 1            
-            @scheduler.release(DEVICEA) 
+   def run(packet)
+      if ( @v2 -= 1 ).zero?
+         @scheduler.holdCurrent
+      else
+         if (@v1 & 1).zero?
+            @v1 >>= 1
+            @scheduler.release(DEVICEA)
          else
-            @v1 >>= 1 
+            @v1 >>= 1
             @v1 ^= 0xD008
-            @scheduler.release(DEVICEB)          
-         end                  
-      end      
+            @scheduler.release(DEVICEB)
+         end
+      end
    end
 end
 
 
 class WorkerTask
    ALPHA = "0ABCDEFGHIJKLMNOPQRSTUVWXYZ"
- 
+
    def initialize(scheduler,v1,v2)
       @scheduler = scheduler
       @v1 = v1
-      @v2 = v2   
-   end   
+      @v2 = v2
+   end
 
    def run(packet)
       if packet # not nil
-         @v1 = 
-            if @v1 == HANDLERA 
+         @v1 =
+            if @v1 == HANDLERA
                HANDLERB
             else
                HANDLERA
-            end      
+            end
          packet.id = @v1
          packet.a1 = 0
-                  
+
          packet.a2.collect! {|x|
             @v2 += 1
-            @v2 = 1 if @v2 > 26 
+            @v2 = 1 if @v2 > 26
             ALPHA[@v2]
-            }                  
-         @scheduler.queue(packet) 
+            }
+         @scheduler.queue(packet)
       else
-         @scheduler.suspendCurrent         
-      end      
+         @scheduler.suspendCurrent
+      end
    end
 end
 
 
 class Tcb
-   RUNNING = 0b0   
-   RUNNABLE = 0b1 
-   SUSPENDED = 0b10   
-   HELD = 0b100   
+   RUNNING = 0b0
+   RUNNABLE = 0b1
+   SUSPENDED = 0b10
+   HELD = 0b100
    SUSPENDED_RUNNABLE = SUSPENDED | RUNNABLE
-   NOT_HELD = ~HELD 
+   NOT_HELD = ~HELD
 
    attr_reader :link, :id, :pri
 
@@ -276,56 +278,56 @@ class Tcb
       @link = link
       @id = id
       @pri = pri
-      @wkq = wkq     
-      @task = task  
-      # SUSPENDED_RUNNABLE else SUSPENDED       
-      @state = if wkq then 0b11 else 0b10 end                        
-   end                 
-          
+      @wkq = wkq
+      @task = task
+      # SUSPENDED_RUNNABLE else SUSPENDED
+      @state = if wkq then 0b11 else 0b10 end
+   end
+
    def checkPriorityAdd(task,packet)
       if @wkq # not nil
-         packet.addTo(@wkq)      
-      else      
+         packet.addTo(@wkq)
+      else
          @wkq = packet
-         @state |= 0b1 # RUNNABLE      
-         return self if @pri > task.pri         
-      end      
+         @state |= 0b1 # RUNNABLE
+         return self if @pri > task.pri
+      end
       task
    end
-           
-   def run 
-      if @state == 0b11 # SUSPENDED_RUNNABLE   
+
+   def run
+      if @state == 0b11 # SUSPENDED_RUNNABLE
          packet = @wkq
-         @wkq = packet.link         
+         @wkq = packet.link
          @state = @wkq ? 0b1 : 0b0 # RUNNABLE : RUNNING
       else
          packet = nil
-      end   
-      @task.run(packet)     
-   end         
-   
+      end
+      @task.run(packet)
+   end
+
    def setRunning
       @state = 0b0 # RUNNING
    end
-   
+
    def suspended
       @state |= 0b10 # SUSPENDED
-      self      
-   end      
-   
+      self
+   end
+
    def held
       @state |= 0b100 # HELD
-   end   
-   
+   end
+
    def notHeld
       @state &= ~0b100 # NOT_HELD
-   end     
-   
+   end
+
    def isHeldOrSuspended?
       #(@state & HELD) != 0 || @state == SUSPENDED
       (@state & 0b100) != 0 || @state == 0b10
-   end        
-end 
+   end
+end
 
 
 class Packet
@@ -334,7 +336,7 @@ class Packet
 
    attr_accessor :link, :id, :kind, :a1
    attr_reader :a2
-   
+
    def initialize(link, id, kind)
       @link = link
       @id = id
@@ -342,25 +344,25 @@ class Packet
       @a1 = 0
       @a2 = Array.new(4,0)
    end
-   
+
    def addTo(queue)
      @link = nil
      unless queue
-       self      
+       self
      else
        nextPacket = queue
-       while (peek = nextPacket.link) 
+       while (peek = nextPacket.link)
          nextPacket = peek
        end
        nextPacket.link = self
        queue
      end
    end
-    
+
 end
 
 class Packet
-   
+
   attr_accessor :link, :id, :kind, :a1
   attr_reader :a2
    def initialize(link, id, kind)
@@ -374,10 +376,10 @@ class Packet
    def addTo(queue)
      @link = nil
      unless queue
-       self      
+       self
      else
        nextPacket = queue
-       while (peek = nextPacket.link) 
+       while (peek = nextPacket.link)
          nextPacket = peek
        end
        nextPacket.link = self

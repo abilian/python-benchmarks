@@ -4,6 +4,7 @@
 # contributed by Jesse Millikan
 # Modified by Wesley Moxam and Michael Klaus
 
+DEPTH = 17
 
 def item_check(left, item, right)
   return item if left.nil?
@@ -17,7 +18,7 @@ def bottom_up_tree(item, depth)
   [bottom_up_tree(item_item - 1, depth), item, bottom_up_tree(item_item, depth)]
 end
 
-max_depth = ARGV[0].to_i
+max_depth = DEPTH
 min_depth = 4
 
 max_depth = [min_depth + 2, max_depth].max
