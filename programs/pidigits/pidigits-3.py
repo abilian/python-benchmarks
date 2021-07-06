@@ -7,12 +7,13 @@
 
 import sys
 from itertools import islice
+
 try:
     from gmpy2 import mpz
 except ImportError:
     from gmpy_cffi import mpz
 
- 
+
 (MPZ0, MPZ1, MPZ2, MPZ3, MPZ4, MPZ10) = (mpz(i) for i in (0, 1, 2, 3, 4, 10))
 
 
@@ -30,17 +31,26 @@ def compose(q1, q2):
 
     a, b, c, d = q1
     e, f, g, h = q2
-    return (a * e,  a * f + b * h,  c * e + d * g,  c * f + d * h)
+    return (a * e, a * f + b * h, c * e + d * g, c * f + d * h)
 
 
 def extract(q, j):
-    
+
     a, b, c, d = q
     return (a * j + b) // (c * j + d)
 
 
-def pi_digits(x=gen_x(), extr=extract, comp=compose, zero=MPZ0, 
-              one=MPZ1, three=MPZ3, four=MPZ4, ten=MPZ10, mten=-MPZ10):
+def pi_digits(
+    x=gen_x(),
+    extr=extract,
+    comp=compose,
+    zero=MPZ0,
+    one=MPZ1,
+    three=MPZ3,
+    four=MPZ4,
+    ten=MPZ10,
+    mten=-MPZ10,
+):
 
     z = (one, zero, zero, one)
     while True:
@@ -52,12 +62,12 @@ def pi_digits(x=gen_x(), extr=extract, comp=compose, zero=MPZ0,
         yield str(y)
 
 
-def main(n, digits=pi_digits(), width=10, line='{}\t:{}'):
+def main(n, digits=pi_digits(), width=10, line="{}\t:{}"):
 
-    for i in range(width, n+1, width):
-        print(line.format(''.join(islice(digits, width)), i))
+    for i in range(width, n + 1, width):
+        print(line.format("".join(islice(digits, width)), i))
     if n % width > 0:
-        print(line.format(''.join(islice(digits, n % width)).ljust(width), n))
+        print(line.format("".join(islice(digits, n % width)).ljust(width), n))
 
 
 main(int(sys.argv[1]))
