@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 
 import fire as fire
+from devtools import debug
 
 import config
 
@@ -144,6 +145,11 @@ class Run:
 
         self.start_time = time.time()
 
+        environ = dict(**os.environ)
+        if "setenv" in (self.variant or {}):
+            environ.update(self.variant["setenv"])
+            debug(environ)
+
         error = ""
         if self.virtualenv:
             cmd[0] = f"{os.getcwd()}/envs/{self.virtualenv}/bin/{cmd[0]}"
@@ -154,6 +160,7 @@ class Run:
                     cmd,
                     cwd="sandbox",
                     capture_output=True,
+                    env=environ,
                 )
                 self.returncode = p.returncode
                 if DEBUG:
@@ -291,6 +298,9 @@ class RubyRunner(Runner):
     interpreter = "ruby"
     variants = [
         {"interpreter": "ruby"},
+        {"interpreter": "ruby", "setenv": {"RUBYOPT": "--jit"}},
+        {"interpreter": "ruby3"},
+        {"interpreter": "ruby3", "setenv": {"RUBYOPT": "--jit"}},
         {"interpreter": "jruby"},
     ]
 
@@ -351,6 +361,9 @@ class CRunner(Runner):
         {
             "name": "clang",
         },
+        # {
+        #     "name": "tcc",
+        # },
     ]
 
     def compile_cmd(self, run: Run):
