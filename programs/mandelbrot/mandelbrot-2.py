@@ -1,7 +1,7 @@
-#{
+# {
 #   "description": "",
 #   "builder": ["
-#}
+# }
 
 ITERATIONS = 100
 EXPECTED = 8939
@@ -42,7 +42,7 @@ def mandelbrot() -> int:
             Z, z, T, t = 0.0, 0.0, 0.0, 0.0
 
             C = (x * 2) / h - K
-            c = (y * 2) / h- k
+            c = (y * 2) / h - k
 
             i: float = 0
             while i < 50:

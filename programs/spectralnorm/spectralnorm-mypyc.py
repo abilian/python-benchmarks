@@ -18,8 +18,9 @@ def eval_A(i: int, j: int) -> float:
     return 1.0 / ((i + j) * (i + j + 1) // 2 + i + 1)
 
 
-def eval_times_u(func: Callable[[Tuple[int, List[float]]], float],
-                 u: List[float]) -> List[float]:
+def eval_times_u(
+    func: Callable[[Tuple[int, List[float]]], float], u: List[float]
+) -> List[float]:
     return [func((i, u)) for i in range(len(list(u)))]
 
 

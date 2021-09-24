@@ -9,7 +9,8 @@ import _thread
 
 # Set minimum stack size for threads, otherwise the program may fail
 # to create such a many threads
-_thread.stack_size(32*1024)
+_thread.stack_size(32 * 1024)
+
 
 def threadfun(number, lock_acquire, next_release):
     global n
@@ -21,6 +22,7 @@ def threadfun(number, lock_acquire, next_release):
         else:
             print(number)
             main_lock.release()
+
 
 # main
 n = int(sys.argv[1])
@@ -34,8 +36,7 @@ for number in range(503):
     lock = next_lock
     lock.acquire()
     next_lock = _thread.allocate_lock() if number < 502 else first_lock
-    _thread.start_new_thread(threadfun,
-        (number+1, lock.acquire, next_lock.release))
+    _thread.start_new_thread(threadfun, (number + 1, lock.acquire, next_lock.release))
 
 first_lock.release()
 main_lock.acquire()

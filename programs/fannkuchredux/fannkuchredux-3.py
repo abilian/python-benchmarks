@@ -9,6 +9,7 @@ from math import factorial
 from multiprocessing import cpu_count, Pool
 from itertools import islice, starmap
 
+
 def permutations(n, start, size):
     p = bytearray(range(n))
 
@@ -16,7 +17,7 @@ def permutations(n, start, size):
     for v in range(n - 1, 0, -1):
         rotation_count, remainder = divmod(remainder, factorial(v))
         for _ in range(rotation_count):
-            p[:v], p[v] = p[1:v + 1], p[0]
+            p[:v], p[v] = p[1 : v + 1], p[0]
 
     if size < 2:
         yield p[:]
@@ -30,7 +31,8 @@ def permutations(n, start, size):
             for v, modulo in rotations:
                 if i % modulo != 0:
                     break
-                p[:v], p[v] = p[1:v + 1], p[0]
+                p[:v], p[v] = p[1 : v + 1], p[0]
+
 
 def alternating_flips_generator(n, start, size):
     maximum_flips = 0
@@ -40,9 +42,10 @@ def alternating_flips_generator(n, start, size):
         if first:
             flips_count = 1
             while True:
-                permutation[:first + 1] = permutation[first::-1]
+                permutation[: first + 1] = permutation[first::-1]
                 first = permutation[0]
-                if not first: break
+                if not first:
+                    break
                 flips_count += 1
             if maximum_flips < flips_count:
                 maximum_flips = flips_count
@@ -52,12 +55,14 @@ def alternating_flips_generator(n, start, size):
         alternating_factor = -alternating_factor
     yield maximum_flips
 
+
 def task(n, start, size):
     alternating_flips = alternating_flips_generator(n, start, size)
     return sum(islice(alternating_flips, size)), next(alternating_flips)
 
+
 def fannkuch(n):
-    assert(n > 0)
+    assert n > 0
 
     task_count = cpu_count()
     total = factorial(n)
@@ -67,7 +72,7 @@ def fannkuch(n):
         task_size = total
         task_count = 1
 
-    assert(task_size % 2 == 0)
+    assert task_size % 2 == 0
 
     task_args = [(n, i * task_size, task_size) for i in range(task_count)]
 
@@ -79,6 +84,7 @@ def fannkuch(n):
 
     checksum, maximum = sum(checksums), max(maximums)
     print("{0}\nPfannkuchen({1}) = {2}".format(checksum, n, maximum))
+
 
 if __name__ == "__main__":
     fannkuch(int(argv[1]))

@@ -8,6 +8,7 @@ import gc
 
 DEPTH = 15
 
+
 class Tree:
     def __init__(self, depth: int) -> None:
         if depth == 0:
