@@ -366,7 +366,7 @@ class CRunner(Runner):
     def compile_cmd(self, run: Run):
         variant = run.variant
         compiler = variant["name"]
-        return [compiler, "-O3", run.source_name, "-lm"]
+        return [compiler, "-O3", run.source_name, "-lm", "-lpthread"]
 
     def run_cmd(self, run: Run) -> List[str]:
         return ["./a.out", run.args]
