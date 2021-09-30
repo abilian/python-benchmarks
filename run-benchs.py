@@ -9,13 +9,11 @@ import pathlib
 import re
 import shutil
 import subprocess
-import sys
 import time
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 
 import fire as fire
-from devtools import debug
 
 import config
 
@@ -148,7 +146,6 @@ class Run:
         environ = dict(**os.environ)
         if "setenv" in (self.variant or {}):
             environ.update(self.variant["setenv"])
-            debug(environ)
 
         error = ""
         if self.virtualenv:
@@ -298,9 +295,9 @@ class RubyRunner(Runner):
     interpreter = "ruby"
     variants = [
         {"interpreter": "ruby"},
-        {"interpreter": "ruby", "setenv": {"RUBYOPT": "--jit"}},
+        {"interpreter": "ruby", "setenv": {"RUBYOPT": "--jit"}, "name": "ruby+jit"},
         {"interpreter": "ruby3"},
-        {"interpreter": "ruby3", "setenv": {"RUBYOPT": "--jit"}},
+        {"interpreter": "ruby3", "setenv": {"RUBYOPT": "--jit"}, "name": "ruby3+jit"},
         {"interpreter": "jruby"},
     ]
 
