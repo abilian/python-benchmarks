@@ -1,17 +1,21 @@
-env:
-	python3.8 -m venv env
-	./env/bin/pip install -U pip wheel setuptools
-	./env/bin/pip install -r requirements.txt
-	echo "Now run 'source ./env/bin/activate.{sh|fish}"
-
 clean:
 	rm -f **/*.pyc
 	find . -type d -empty -delete
 
 format:
 	docformatter -i *.py
-	black *.py
+	black .
 
 
-push-programs:
-	rsync -e ssh -avz programs chai:python-benchmarks/
+push:
+	rsync -e ssh -avz *.py programs c17:python-benchmarks/
+
+pull-results:
+	rsync -e ssh -avz c17:python-benchmarks/result.txt web/
+
+
+publish:
+	make pull-results
+	cd web && python publish.py
+	rsync -e ssh -avz web/*.html root@bulma:/srv/web/lab.abilian.com/python-benchmarks/
+
